@@ -28,6 +28,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 from chart import make_chart
+from company import company_info
 
 # ---------------------------------------------------------------- settings
 
@@ -91,6 +92,8 @@ def save_state(state):
 
 
 def money(value):
+    if value >= 1_000_000_000_000:
+        return f"${value / 1_000_000_000_000:.2f}T"
     if value >= 1_000_000_000:
         return f"${value / 1_000_000_000:.2f}B"
     if value >= 1_000_000:
@@ -231,6 +234,10 @@ def parse_form4(xml_text):
 
     ticker = _text(root, "issuer/issuerTradingSymbol").upper()
     company = _text(root, "issuer/issuerName")
+    try:
+        issuer_cik = int(_text(root, "issuer/issuerCik") or 0) or None
+    except ValueError:
+        issuer_cik = None
 
     owners = []
     for ro in root.findall("reportingOwner"):
@@ -276,6 +283,7 @@ def parse_form4(xml_text):
     return {
         "ticker": ticker,
         "company": company,
+        "issuer_cik": issuer_cik,
         "owner": owners[0],
         "co_owners": owners[1:],
         "shares": shares,
@@ -336,8 +344,14 @@ def build_embed(buy, filed_date, filing_url):
     ]
     if buy["stake_change"] is not None:
         fields.append({"name": "Stake change", "value": f"+{buy['stake_change']:.1f}%", "inline": True})
+    cap = cap_text(buy)
+    if cap:
+        fields.append({"name": "Market cap", "value": cap, "inline": True})
+    title = f"💼 Insider Buy · ${buy['ticker']}" + (f" ({buy['exchange']})" if buy.get("exchange") else "")
+    if buy.get("sp500"):
+        title += " · ⭐ S&P 500"
     return {
-        "title": f"💼 Insider Buy · ${buy['ticker']}" + (f" ({buy['exchange']})" if buy.get("exchange") else ""),
+        "title": title,
         "url": filing_url,
         "description": summary_line(buy),
         "color": 0x2ECC71,
@@ -346,18 +360,31 @@ def build_embed(buy, filed_date, filing_url):
     }
 
 
-def build_cluster_embed(ticker, company, buys, exchange=None):
+def cap_text(buy):
+    """'$2.13B · Mid cap' or None."""
+    if not buy.get("market_cap"):
+        return None
+    return f"{money(buy['market_cap'])} · {buy['size']}"
+
+
+def build_cluster_embed(ticker, company, buys, exchange=None, info=None):
+    info = info or {}
     names = []
     total = 0.0
     for b in buys:
         total += b["value"]
         names.append(f"• **{b['name']}** ({b['role']}) · {money(b['value'])} on {b['date']}")
+    title = f"🔥 Cluster Buy · ${ticker}" + (f" ({exchange})" if exchange else "")
+    if info.get("sp500"):
+        title += " · ⭐ S&P 500"
+    cap = cap_text(info)
     return {
-        "title": f"🔥 Cluster Buy · ${ticker}" + (f" ({exchange})" if exchange else ""),
+        "title": title,
         "description": (
             f"**{len(buys)} different insiders** at **{nice_company(company)}** "
             f"(**{f'{exchange}: ' if exchange else ''}{ticker}**) bought stock "
             f"within {CLUSTER_WINDOW_DAYS} days, **{money(total)}** in total.\n\n" + "\n".join(names)
+            + (f"\n\nMarket cap: **{cap}**" if cap else "")
         ),
         "color": 0xE67E22,
         "footer": {"text": "📡 Insider Radar · Source: SEC Form 4 · Not financial advice"},
@@ -450,11 +477,13 @@ def run():
         buys_found += 1
 
         # price chart + which exchange the stock trades on
-        image, buy["exchange"] = make_chart(buy["ticker"], buy["trade_date"], buy["trade_date_end"], buy["avg_price"])
+        image, buy["exchange"], last_price = make_chart(buy["ticker"], buy["trade_date"], buy["trade_date_end"], buy["avg_price"])
         name = nice_name(buy["owner"]["name"])
         if SKIP_OTC and buy["exchange"] and buy["exchange"] not in ALLOWED_EXCHANGES:
             log(f"  skip {buy['ticker']} {name} {money(buy['value'])}: listed on {buy['exchange']}")
             continue
+        # market cap + S&P 500 tag
+        buy.update(company_info(session, buy.get("issuer_cik"), buy["ticker"], last_price))
 
         state["buys"].append({
             "ticker": buy["ticker"], "company": buy["company"], "name": name,
@@ -472,7 +501,7 @@ def run():
         if cluster_webhook and not bootstrap:
             cluster = find_cluster(state, buy["ticker"], buy["trade_date"] or today)
             if cluster:
-                post_discord(cluster_webhook, build_cluster_embed(buy["ticker"], buy["company"], cluster, buy.get("exchange")))
+                post_discord(cluster_webhook, build_cluster_embed(buy["ticker"], buy["company"], cluster, buy.get("exchange"), buy))
                 log(f"  cluster alert {buy['ticker']}")
 
     if newest_time is not None:

@@ -128,13 +128,15 @@ def render_chart(ticker, rows, buy_start, buy_end, avg_price, exchange=None):
 
 
 def make_chart(ticker, buy_start, buy_end, avg_price):
-    """Return (png_bytes or None, exchange or None). Never raises."""
-    exchange = None
+    """Return (png_bytes or None, exchange or None, last_price or None). Never raises."""
+    exchange = last_price = None
     try:
         rows, exchange = fetch_prices(ticker)
+        if rows:
+            last_price = rows[-1][4]
         if len(rows) < 10:
-            return None, exchange
-        return render_chart(ticker, rows, buy_start, buy_end, avg_price, exchange), exchange
+            return None, exchange, last_price
+        return render_chart(ticker, rows, buy_start, buy_end, avg_price, exchange), exchange, last_price
     except Exception as e:
         print(f"  chart skipped for {ticker}: {e}", flush=True)
-        return None, exchange
+        return None, exchange, last_price
