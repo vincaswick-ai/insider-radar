@@ -27,6 +27,8 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
+from chart import make_chart
+
 # ---------------------------------------------------------------- settings
 
 FEED_URL = (
@@ -321,10 +323,17 @@ def build_cluster_embed(ticker, company, buys):
 
 # ---------------------------------------------------------------- Discord
 
-def post_discord(webhook, embed):
+def post_discord(webhook, embed, image=None):
+    """Post one embed. If image (PNG bytes) is given, it is shown inside the embed."""
     payload = {"username": "Insider Radar", "embeds": [embed]}
+    if image:
+        embed["image"] = {"url": "attachment://chart.png"}
     for _ in range(3):
-        r = requests.post(webhook, json=payload, timeout=30)
+        if image:
+            r = requests.post(webhook, data={"payload_json": json.dumps(payload)},
+                              files={"files[0]": ("chart.png", image, "image/png")}, timeout=30)
+        else:
+            r = requests.post(webhook, json=payload, timeout=30)
         if r.status_code == 429:
             time.sleep(float(r.json().get("retry_after", 2)) + 0.5)
             continue
@@ -405,7 +414,8 @@ def run():
         if posted >= limit:
             continue
         filing_url = f"{base}/{accession}-index.htm"
-        post_discord(webhook, build_embed(buy, today, filing_url))
+        image = make_chart(buy["ticker"], buy["trade_date"], buy["trade_date_end"], buy["avg_price"])
+        post_discord(webhook, build_embed(buy, today, filing_url), image)
         posted += 1
         log(f"  posted {buy['ticker']} {name} {money(buy['value'])}")
 
