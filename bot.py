@@ -40,7 +40,15 @@ ARCHIVE_URL = "https://www.sec.gov/Archives/edgar/data/{cik}/{acc}"
 STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "state.json")
 
 MIN_VALUE = float(os.environ.get("MIN_VALUE", "50000"))
-FEED_PAGES = 3                 # up to 300 newest entries per run
+# SEC's "type=4" feed also contains other forms starting with 4 (424B2, 40-17G...),
+# so only a small share of each 100-entry page is a real Form 4. We therefore keep
+# paging back until we reach the time of the previous run.
+MAX_FEED_PAGES = 30            # hard cap: up to 3,000 feed entries per run
+FEED_OVERLAP_MIN = 15          # re-check a little before last run's newest entry
+# Only post stocks listed on these exchanges (skips risky OTC / penny stocks).
+# If the exchange can't be determined, the alert is still posted.
+ALLOWED_EXCHANGES = {"NYSE", "NASDAQ", "NYSE American", "NYSE Arca", "Cboe"}
+SKIP_OTC = os.environ.get("SKIP_OTC", "1") != "0"
 MAX_POSTS_PER_RUN = 15         # safety cap so a backlog never spams the channel
 BOOTSTRAP_POSTS = 3            # on the very first run, post only a few examples
 CLUSTER_WINDOW_DAYS = 14
@@ -120,14 +128,26 @@ def nice_company(raw):
 
 # ---------------------------------------------------------------- EDGAR feed
 
-def fetch_feed(session, seen):
-    """Return list of (accession, cik) for new original Form 4 filings, newest first."""
+def fetch_feed(session, seen, last_time, bootstrap):
+    """
+    Return (filings, newest_time) where filings is a list of (accession, cik)
+    for new original Form 4 filings, newest first, and newest_time is the
+    timestamp of the newest feed entry (saved for the next run).
+    """
+    cutoff = None
+    if last_time:
+        cutoff = datetime.fromisoformat(last_time) - timedelta(minutes=FEED_OVERLAP_MIN)
     found, order = {}, []
-    for page in range(FEED_PAGES):
+    newest_time = None
+    pages_read = 0
+    for page in range(MAX_FEED_PAGES):
         xml_text = http_get(FEED_URL.format(start=page * 100), session).text
-        entries = parse_feed(xml_text)
-        if not entries:
+        entries, page_newest, page_oldest = parse_feed(xml_text)
+        pages_read += 1
+        if page_newest is None:          # empty page: end of feed
             break
+        if newest_time is None:
+            newest_time = page_newest
         hit_seen = False
         for acc, cik in entries:
             if acc in seen:
@@ -136,17 +156,31 @@ def fetch_feed(session, seen):
             if acc not in found:
                 found[acc] = cik
                 order.append(acc)
-        if hit_seen:
+        if bootstrap:
+            break                        # first run: one page is plenty
+        if cutoff is not None:
+            if page_oldest <= cutoff:    # reached the previous run's time
+                break
+        elif hit_seen:                   # old state without a timestamp
             break
-    return [(acc, found[acc]) for acc in order]
+    log(f"Read {pages_read} feed page(s).")
+    return [(acc, found[acc]) for acc in order], newest_time
 
 
 def parse_feed(xml_text):
+    """Return (form4_entries, newest_time, oldest_time) for one feed page."""
     root = ET.fromstring(xml_text)
     out = []
+    times = []
     for entry in root.findall(f"{ATOM}entry"):
+        updated = (entry.findtext(f"{ATOM}updated") or "").strip()
+        if updated:
+            try:
+                times.append(datetime.fromisoformat(updated))
+            except ValueError:
+                pass
         title = (entry.findtext(f"{ATOM}title") or "").strip()
-        if not title.startswith("4 "):          # skip "4/A" amendments
+        if not title.startswith("4 "):          # skip "4/A", 424B2, 40-17G ...
             continue
         entry_id = entry.findtext(f"{ATOM}id") or ""
         m_acc = re.search(r"accession-number=(\d{10}-\d{2}-\d{6})", entry_id)
@@ -155,7 +189,9 @@ def parse_feed(xml_text):
         m_cik = re.search(r"/edgar/data/(\d+)/", href)
         if m_acc and m_cik:
             out.append((m_acc.group(1), m_cik.group(1)))
-    return out
+    if not times:
+        return out, None, None
+    return out, max(times), min(times)
 
 
 def fetch_form4_xml(session, accession, cik):
@@ -389,11 +425,12 @@ def run():
         log("First run: will post only a few example alerts.")
     seen = set(state["seen"])
 
-    new_filings = fetch_feed(session, seen)
+    new_filings, newest_time = fetch_feed(session, seen, state.get("last_feed_time"), bootstrap)
     log(f"New Form 4 filings to check: {len(new_filings)}")
 
     today = datetime.now(timezone.utc).date().isoformat()
     posted = 0
+    buys_found = 0
     limit = BOOTSTRAP_POSTS if bootstrap else MAX_POSTS_PER_RUN
 
     # oldest first, so alerts appear in the channel in time order
@@ -410,8 +447,15 @@ def run():
             continue
         if not buy or buy["value"] < MIN_VALUE:
             continue
+        buys_found += 1
 
+        # price chart + which exchange the stock trades on
+        image, buy["exchange"] = make_chart(buy["ticker"], buy["trade_date"], buy["trade_date_end"], buy["avg_price"])
         name = nice_name(buy["owner"]["name"])
+        if SKIP_OTC and buy["exchange"] and buy["exchange"] not in ALLOWED_EXCHANGES:
+            log(f"  skip {buy['ticker']} {name} {money(buy['value'])}: listed on {buy['exchange']}")
+            continue
+
         state["buys"].append({
             "ticker": buy["ticker"], "company": buy["company"], "name": name,
             "role": role_text(buy["owner"]["roles"]), "value": round(buy["value"], 2),
@@ -421,7 +465,6 @@ def run():
         if posted >= limit:
             continue
         filing_url = f"{base}/{accession}-index.htm"
-        image, buy["exchange"] = make_chart(buy["ticker"], buy["trade_date"], buy["trade_date_end"], buy["avg_price"])
         post_discord(webhook, build_embed(buy, today, filing_url), image)
         posted += 1
         log(f"  posted {buy['ticker']} {name} {money(buy['value'])}")
@@ -432,8 +475,10 @@ def run():
                 post_discord(cluster_webhook, build_cluster_embed(buy["ticker"], buy["company"], cluster, buy.get("exchange")))
                 log(f"  cluster alert {buy['ticker']}")
 
+    if newest_time is not None:
+        state["last_feed_time"] = newest_time.isoformat()
     save_state(state)
-    log(f"Done. Posted {posted} alert(s).")
+    log(f"Done. Open-market buys over {money(MIN_VALUE)}: {buys_found}. Posted {posted} alert(s).")
 
 
 if __name__ == "__main__":

@@ -5,6 +5,8 @@ Posts SEC Form 4 insider **buys** to Discord, in plain English.
 - Checks SEC EDGAR every 15 minutes (Mon–Fri) using GitHub Actions — free, no server needed.
 - Keeps only real open-market purchases (code `P`) above `MIN_VALUE` (default $50,000).
 - Ignores sales, stock awards, option exercises and amendments.
+- Skips OTC / penny stocks — only NYSE, NASDAQ, NYSE American, NYSE Arca and Cboe listings are posted (set variable `SKIP_OTC` to `0` to allow OTC).
+- Reads back through SEC's feed until it reaches the previous run, so nothing is missed even if GitHub runs late.
 - Posts a 🔥 cluster alert when 3+ different insiders buy the same stock within 14 days.
 - Remembers processed filings in `state.json` (committed back automatically).
 
