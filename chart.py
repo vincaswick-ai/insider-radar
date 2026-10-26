@@ -30,13 +30,15 @@ BUY = "#f0b232"
 
 
 def fetch_prices(ticker):
-    """Return list of (date, open, high, low, close) or [] if unavailable."""
+    """Return (rows, exchange). rows = [(date, open, high, low, close)], exchange like 'NYSE' or None."""
     url = PRICE_URL.format(ticker=ticker.replace(".", "-"))
     r = requests.get(url, headers={"User-Agent": BROWSER_UA}, timeout=20)
     r.raise_for_status()
     result = (r.json().get("chart", {}).get("result") or [None])[0]
     if not result:
-        return []
+        return [], None
+    meta = result.get("meta") or {}
+    exchange = clean_exchange(meta.get("fullExchangeName") or meta.get("exchangeName") or "")
     ts = result.get("timestamp") or []
     q = (result.get("indicators", {}).get("quote") or [{}])[0]
     rows = []
@@ -45,10 +47,31 @@ def fetch_prices(ticker):
         if None in (o, h, l, c):
             continue
         rows.append((datetime.fromtimestamp(t, tz=timezone.utc).date(), o, h, l, c))
-    return rows
+    return rows, exchange
 
 
-def render_chart(ticker, rows, buy_start, buy_end, avg_price):
+def clean_exchange(raw):
+    """Turn Yahoo's exchange names into the short names traders know."""
+    r = raw.strip()
+    low = r.lower()
+    if not r:
+        return None
+    if "nasdaq" in low or low in ("ncm", "ngm", "nms"):
+        return "NASDAQ"
+    if "arca" in low or low == "pcx":
+        return "NYSE Arca"
+    if "american" in low or low in ("ase", "amex"):
+        return "NYSE American"
+    if "nyse" in low or low == "nyq":
+        return "NYSE"
+    if "otc" in low or "pink" in low or low in ("pnk", "oqb", "oqx"):
+        return "OTC"
+    if "cboe" in low or "bats" in low:
+        return "Cboe"
+    return r
+
+
+def render_chart(ticker, rows, buy_start, buy_end, avg_price, exchange=None):
     """Return PNG bytes."""
     dates = [mdates.date2num(r[0]) for r in rows]
     fig, ax = plt.subplots(figsize=(8, 4.2), dpi=120)
@@ -80,7 +103,8 @@ def render_chart(ticker, rows, buy_start, buy_end, avg_price):
     last = rows[-1][4]
     change = (last / avg_price - 1) * 100
     sign = "+" if change >= 0 else ""
-    ax.set_title(f"\\${ticker}  ·  6 months, daily  ·  now \\${last:,.2f} ({sign}{change:.1f}% vs insider)",
+    label = f"{exchange}: \\${ticker}" if exchange else f"\\${ticker}"
+    ax.set_title(f"{label}  ·  6 months, daily  ·  now \\${last:,.2f} ({sign}{change:.1f}% vs insider)",
                  color=TEXT, fontsize=11, loc="left", pad=10, fontweight="bold")
 
     ax.xaxis.set_major_locator(mdates.MonthLocator())
@@ -104,12 +128,13 @@ def render_chart(ticker, rows, buy_start, buy_end, avg_price):
 
 
 def make_chart(ticker, buy_start, buy_end, avg_price):
-    """PNG bytes, or None if the chart can't be made. Never raises."""
+    """Return (png_bytes or None, exchange or None). Never raises."""
+    exchange = None
     try:
-        rows = fetch_prices(ticker)
+        rows, exchange = fetch_prices(ticker)
         if len(rows) < 10:
-            return None
-        return render_chart(ticker, rows, buy_start, buy_end, avg_price)
+            return None, exchange
+        return render_chart(ticker, rows, buy_start, buy_end, avg_price, exchange), exchange
     except Exception as e:
         print(f"  chart skipped for {ticker}: {e}", flush=True)
-        return None
+        return None, exchange

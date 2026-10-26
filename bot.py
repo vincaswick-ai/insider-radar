@@ -266,11 +266,17 @@ def role_text(roles):
     return ", ".join(dict.fromkeys(cleaned))
 
 
+def ticker_label(buy):
+    """'NYSE: BPRE' when the exchange is known, otherwise just 'BPRE'."""
+    ex = buy.get("exchange")
+    return f"{ex}: {buy['ticker']}" if ex else buy["ticker"]
+
+
 def summary_line(buy):
     name = nice_name(buy["owner"]["name"])
     who = f"**{name}** ({role_text(buy['owner']['roles'])})"
     line = (f"{who} bought **{money(buy['value'])}** of "
-            f"**{nice_company(buy['company'])}** stock with their own money.")
+            f"**{nice_company(buy['company'])}** (**{ticker_label(buy)}**) stock with their own money.")
     sc = buy["stake_change"]
     if sc is None:
         line += " This looks like a **brand-new position** for them."
@@ -295,7 +301,7 @@ def build_embed(buy, filed_date, filing_url):
     if buy["stake_change"] is not None:
         fields.append({"name": "Stake change", "value": f"+{buy['stake_change']:.1f}%", "inline": True})
     return {
-        "title": f"💼 Insider Buy · ${buy['ticker']}",
+        "title": f"💼 Insider Buy · ${buy['ticker']}" + (f" ({buy['exchange']})" if buy.get("exchange") else ""),
         "url": filing_url,
         "description": summary_line(buy),
         "color": 0x2ECC71,
@@ -304,16 +310,17 @@ def build_embed(buy, filed_date, filing_url):
     }
 
 
-def build_cluster_embed(ticker, company, buys):
+def build_cluster_embed(ticker, company, buys, exchange=None):
     names = []
     total = 0.0
     for b in buys:
         total += b["value"]
         names.append(f"• **{b['name']}** ({b['role']}) · {money(b['value'])} on {b['date']}")
     return {
-        "title": f"🔥 Cluster Buy · ${ticker}",
+        "title": f"🔥 Cluster Buy · ${ticker}" + (f" ({exchange})" if exchange else ""),
         "description": (
-            f"**{len(buys)} different insiders** at **{nice_company(company)}** bought stock "
+            f"**{len(buys)} different insiders** at **{nice_company(company)}** "
+            f"(**{f'{exchange}: ' if exchange else ''}{ticker}**) bought stock "
             f"within {CLUSTER_WINDOW_DAYS} days, **{money(total)}** in total.\n\n" + "\n".join(names)
         ),
         "color": 0xE67E22,
@@ -414,7 +421,7 @@ def run():
         if posted >= limit:
             continue
         filing_url = f"{base}/{accession}-index.htm"
-        image = make_chart(buy["ticker"], buy["trade_date"], buy["trade_date_end"], buy["avg_price"])
+        image, buy["exchange"] = make_chart(buy["ticker"], buy["trade_date"], buy["trade_date_end"], buy["avg_price"])
         post_discord(webhook, build_embed(buy, today, filing_url), image)
         posted += 1
         log(f"  posted {buy['ticker']} {name} {money(buy['value'])}")
@@ -422,7 +429,7 @@ def run():
         if cluster_webhook and not bootstrap:
             cluster = find_cluster(state, buy["ticker"], buy["trade_date"] or today)
             if cluster:
-                post_discord(cluster_webhook, build_cluster_embed(buy["ticker"], buy["company"], cluster))
+                post_discord(cluster_webhook, build_cluster_embed(buy["ticker"], buy["company"], cluster, buy.get("exchange")))
                 log(f"  cluster alert {buy['ticker']}")
 
     save_state(state)
