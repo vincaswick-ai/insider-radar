@@ -1,0 +1,38 @@
+name: Proof finder
+
+on:
+  schedule:
+    # every Saturday ~09:00 Vilnius time (07:00 UTC), ready for content day
+    - cron: "0 7 * * 6"
+  workflow_dispatch:
+    inputs:
+      min_value:
+        description: "Minimum buy size in USD"
+        default: "100000"
+      min_age_days:
+        description: "Buys disclosed at least this many days ago"
+        default: "28"
+      max_age_days:
+        description: "...and at most this many days ago"
+        default: "120"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Find proof
+        env:
+          WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
+          WEBHOOK_INSIDER_BUYS: ${{ secrets.WEBHOOK_INSIDER_BUYS }}
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          PROOF_MIN_VALUE: ${{ inputs.min_value }}
+          PROOF_MIN_AGE_DAYS: ${{ inputs.min_age_days }}
+          PROOF_MAX_AGE_DAYS: ${{ inputs.max_age_days }}
+        run: python proof_finder.py
