@@ -197,6 +197,13 @@ def evaluate(buys):
         start = price_on_or_after(rows, main["filed"])
         if not start:
             continue
+        # sanity check: insider's price must be close to the real market price
+        # (some foreign filers report prices in their home currency)
+        at_trade = price_on_or_after(rows, main["trade_date"] or main["filed"]) or start
+        ratio = main["avg_price"] / at_trade[4] if at_trade[4] else 0
+        if not (0.5 <= ratio <= 2.0):
+            log(f"  skip {main['ticker']}: insider price ${main['avg_price']:,.2f} vs market ${at_trade[4]:,.2f}")
+            continue
         last = rows[-1]
         ret = last[4] / start[4] - 1
         r = dict(main)

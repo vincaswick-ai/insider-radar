@@ -512,6 +512,11 @@ def run():
         if SKIP_OTC and buy["exchange"] and buy["exchange"] not in ALLOWED_EXCHANGES:
             log(f"  skip {buy['ticker']} {name} {money(buy['value'])}: listed on {buy['exchange']}")
             continue
+        # sanity check: insider's price must be near the real market price
+        # (some foreign filers report prices in their home currency)
+        if last_price and not (0.33 <= buy["avg_price"] / last_price <= 3.0):
+            log(f"  skip {buy['ticker']} {name}: price ${buy['avg_price']:,.2f} vs market ${last_price:,.2f} looks wrong")
+            continue
         # market cap + S&P 500 tag
         buy.update(company_info(session, buy.get("issuer_cik"), buy["ticker"], last_price))
 
