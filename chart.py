@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import requests
 
-PRICE_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?range=6mo&interval=1d"
+PRICE_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?range={range}&interval=1d"
 BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 
 BG = "#1e1f22"
@@ -29,9 +29,9 @@ DOWN = "#f23f43"
 BUY = "#f0b232"
 
 
-def fetch_prices(ticker):
+def fetch_prices(ticker, rng="6mo"):
     """Return (rows, exchange). rows = [(date, open, high, low, close)], exchange like 'NYSE' or None."""
-    url = PRICE_URL.format(ticker=ticker.replace(".", "-"))
+    url = PRICE_URL.format(ticker=ticker.replace(".", "-"), range=rng)
     r = requests.get(url, headers={"User-Agent": BROWSER_UA}, timeout=20)
     r.raise_for_status()
     result = (r.json().get("chart", {}).get("result") or [None])[0]

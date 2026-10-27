@@ -103,18 +103,48 @@ def money(value):
     return f"${value:,.0f}"
 
 
+BAD_TICKERS = {"NONE", "N/A", "NA", "-", "--", "NULL"}   # filings for unlisted securities
+
+ENTITY_WORDS = {"INC", "LLC", "LP", "LLP", "LTD", "LIMITED", "CORP", "CORPORATION", "CO", "COMPANY",
+                "FUND", "FUNDS", "TRUST", "CAPITAL", "MANAGEMENT", "PARTNERS", "HOLDINGS", "GROUP",
+                "BANK", "INSURANCE", "ADVISORS", "ADVISERS", "INVESTMENTS", "INVESTMENT", "FOUNDATION",
+                "VENTURES", "PLC", "SA", "AG", "NV", "GMBH", "ASSOCIATES", "OPPORTUNITIES", "MASTER"}
+NAME_SUFFIXES = {"JR", "SR", "II", "III", "IV", "MD", "PHD"}
+
+
+def _is_initial(word):
+    return len(word.rstrip(".")) == 1
+
+
+def _cap(word):
+    if word.upper().rstrip(".") in NAME_SUFFIXES - {"JR", "SR"}:
+        return word.upper()
+    if word.isupper() or word.islower():
+        return word.title()
+    return word
+
+
 def nice_name(raw):
-    """SEC writes names as 'LAST FIRST MIDDLE'. Turn it into 'First Middle Last'."""
+    """
+    SEC usually writes people as 'LAST FIRST MIDDLE [JR]'. Turn that into
+    'First Middle Last Jr'. Company / fund names are kept in their order.
+    """
     parts = raw.replace(",", " ").split()
-    if len(parts) >= 2 and raw.isupper():
-        parts = parts[1:] + parts[:1]
-    out = []
-    for p in parts:
-        if len(p) <= 2 and p.isupper() and not p.endswith("."):
-            out.append(p if len(p) == 1 else p.title())
-        else:
-            out.append(p.title())
-    return " ".join(out)
+    if not parts:
+        return raw
+    words_up = {p.upper().replace(".", "") for p in parts}
+    if words_up & ENTITY_WORDS or len(parts) > 5:
+        return " ".join(_cap(p) for p in parts)          # a company or fund
+    suffix = []
+    while len(parts) > 2 and parts[-1].upper().rstrip(".") in NAME_SUFFIXES:
+        suffix.insert(0, parts.pop())
+    # ALL-CAPS names follow SEC's LAST FIRST MIDDLE convention; mixed-case ones
+    # are sometimes already written naturally ("Neil S Subin").
+    natural = (not raw.isupper() and len(parts) >= 3
+               and _is_initial(parts[1]) and not _is_initial(parts[-1]))
+    if len(parts) >= 2 and not natural:
+        parts = parts[1:] + parts[:1]                    # LAST FIRST M -> FIRST M LAST
+    return " ".join(_cap(p) for p in parts + suffix)
 
 
 def nice_company(raw):
@@ -274,7 +304,7 @@ def parse_form4(xml_text):
         if d:
             dates.append(d[:10])
 
-    if shares <= 0 or not owners or not ticker:
+    if shares <= 0 or not owners or not ticker or ticker in BAD_TICKERS:
         return None
 
     owned_before = owned_after - shares
