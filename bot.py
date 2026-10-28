@@ -227,6 +227,19 @@ def parse_feed(xml_text):
     return out, max(times), min(times)
 
 
+def readable_filing_url(session, base, accession):
+    """Link to the human-readable Form 4 on sec.gov (falls back to the filing index)."""
+    index_url = f"{base}/{accession}-index.htm"
+    try:
+        html = http_get(f"{base}/{accession}-index.html", session).text
+        m = re.search(r'href="(/Archives/edgar/data/[^"]+/xslF345X\d+/[^"]+\.xml)"', html)
+        if m:
+            return "https://www.sec.gov" + m.group(1)
+    except Exception as e:
+        log(f"  readable link not found for {accession}: {e}")
+    return index_url
+
+
 def fetch_form4_xml(session, accession, cik):
     acc_nodash = accession.replace("-", "")
     base = ARCHIVE_URL.format(cik=int(cik), acc=acc_nodash)
@@ -383,7 +396,7 @@ def build_embed(buy, filed_date, filing_url):
     return {
         "title": title,
         "url": filing_url,
-        "description": summary_line(buy),
+        "description": summary_line(buy) + f"\n\n📄 [View the official SEC filing]({filing_url})",
         "color": 0x2ECC71,
         "fields": fields,
         "footer": {"text": "📡 Insider Radar · Source: SEC Form 4 · Not financial advice"},
@@ -528,7 +541,7 @@ def run():
 
         if posted >= limit:
             continue
-        filing_url = f"{base}/{accession}-index.htm"
+        filing_url = readable_filing_url(session, base, accession)
         post_discord(webhook, build_embed(buy, today, filing_url), image)
         posted += 1
         log(f"  posted {buy['ticker']} {name} {money(buy['value'])}")
