@@ -767,7 +767,27 @@
   "0001551293-26-000005",
   "0001477932-26-006494",
   "0001031082-26-000009",
-  "0001031083-26-000004"
+  "0001031083-26-000004",
+  "0001517413-26-000320",
+  "0001193125-26-436365",
+  "0001510281-26-000385",
+  "0001193125-26-436386",
+  "0001216931-26-000014",
+  "0001517413-26-000322",
+  "0001877170-26-000004",
+  "0001510281-26-000386",
+  "0001193125-26-436415",
+  "0001193125-26-436418",
+  "0001193125-26-436436",
+  "0001510281-26-000387",
+  "0001193125-26-436441",
+  "0001104659-26-119719",
+  "0001193125-26-436443",
+  "0001193125-26-436444",
+  "0001510281-26-000388",
+  "0001610717-26-000445",
+  "0001398344-26-019008",
+  "0000708955-26-000202"
  ],
  "buys": [
   {
@@ -1220,11 +1240,66 @@
    "accession": "0001628280-26-067906",
    "url": "https://www.sec.gov/Archives/edgar/data/1694028/000162828026067906/xslF345X06/wk-form4_1793219078.xml",
    "price": 15.4
+  },
+  {
+   "ticker": "CRBG",
+   "company": "Corebridge Financial, Inc.",
+   "name": "Nippon Life Insurance Co",
+   "role": "10% Owner",
+   "value": 6390298.9,
+   "date": "2026-10-26",
+   "accession": "0001193125-26-436365",
+   "url": "https://www.sec.gov/Archives/edgar/data/905591/000119312526436365/xslF345X06/ownership.xml",
+   "price": 34.9529
+  },
+  {
+   "ticker": "HXL",
+   "company": "HEXCEL CORP /DE/",
+   "name": "Neal J. Keating",
+   "role": "Director",
+   "value": 242010.0,
+   "date": "2026-10-26",
+   "accession": "0001193125-26-436418",
+   "url": "https://www.sec.gov/Archives/edgar/data/717605/000119312526436418/xslF345X06/ownership.xml",
+   "price": 80.67
+  },
+  {
+   "ticker": "GOLD",
+   "company": "Gold.com, Inc.",
+   "name": "Tether Global Investments Fund S.I.C.A.F. S.A.",
+   "role": "10% Owner",
+   "value": 3927258.43,
+   "date": "2026-10-26",
+   "accession": "0001104659-26-119719",
+   "url": "https://www.sec.gov/Archives/edgar/data/1591588/000110465926119719/xslF345X06/tm2628406-1_4seq1.xml",
+   "price": 39.2726
+  },
+  {
+   "ticker": "DSM",
+   "company": "BNY MELLON STRATEGIC MUNICIPAL BOND FUND, INC.",
+   "name": "Saba Capital Management L.P.",
+   "role": "10% Owner",
+   "value": 77102.85,
+   "date": "2026-10-27",
+   "accession": "0001510281-26-000388",
+   "url": "https://www.sec.gov/Archives/edgar/data/855887/000151028126000388/xslF345X06/primary_doc.xml",
+   "price": 5.63
+  },
+  {
+   "ticker": "BPRE",
+   "company": "Bluerock Private Real Estate Fund",
+   "name": "Ramin Kamfar",
+   "role": "Director",
+   "value": 2229725.15,
+   "date": "2026-10-26",
+   "accession": "0001398344-26-019008",
+   "url": "https://www.sec.gov/Archives/edgar/data/1111908/000139834426019008/xslF345X06/fp0101558-1_4.xml",
+   "price": 12.4791
   }
  ],
  "clusters_posted": [
   "STC:3",
   "STC:4"
  ],
- "last_feed_time": "2026-10-28T17:09:02-04:00"
+ "last_feed_time": "2026-10-28T17:47:12-04:00"
 }
