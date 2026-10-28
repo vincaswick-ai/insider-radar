@@ -663,7 +663,9 @@
   "0001628280-26-067824",
   "0000737468-26-000122",
   "0001338943-26-000007",
-  "0001649471-26-000006"
+  "0001649471-26-000006",
+  "0000095029-26-000084",
+  "0001193125-26-435894"
  ],
  "buys": [
   {
@@ -1072,11 +1074,22 @@
    "accession": "0001649471-26-000006",
    "url": "https://www.sec.gov/Archives/edgar/data/910073/000164947126000006/xslF345X06/wk-form4_1793210452.xml",
    "price": 10.14
+  },
+  {
+   "ticker": "XBIT",
+   "company": "XBiotech Inc.",
+   "name": "John Simard",
+   "role": "Director, 10% Owner",
+   "value": 711251.32,
+   "date": "2026-10-26",
+   "accession": "0001193125-26-435894",
+   "url": "https://www.sec.gov/Archives/edgar/data/1626878/000119312526435894/xslF345X06/ownership.xml",
+   "price": 1.93
   }
  ],
  "clusters_posted": [
   "STC:3",
   "STC:4"
  ],
- "last_feed_time": "2026-10-28T14:11:13-04:00"
+ "last_feed_time": "2026-10-28T14:58:30-04:00"
 }
