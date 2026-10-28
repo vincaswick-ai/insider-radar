@@ -27,7 +27,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
-from chart import make_chart
+from chart import make_chart, make_cluster_chart
 from company import company_info
 
 # ---------------------------------------------------------------- settings
@@ -416,7 +416,10 @@ def build_cluster_embed(ticker, company, buys, exchange=None, info=None):
     total = 0.0
     for b in buys:
         total += b["value"]
-        names.append(f"• **{b['name']}** ({b['role']}) · {money(b['value'])} on {b['date']}")
+        line = f"• **{b['name']}** ({b['role']}) · {money(b['value'])} on {b['date']}"
+        if b.get("url"):
+            line += f" · [📄 SEC filing]({b['url']})"
+        names.append(line)
     title = f"🔥 Cluster Buy · ${ticker}" + (f" ({exchange})" if exchange else "")
     if info.get("sp500"):
         title += " · ⭐ S&P 500"
@@ -533,15 +536,16 @@ def run():
         # market cap + S&P 500 tag
         buy.update(company_info(session, buy.get("issuer_cik"), buy["ticker"], last_price))
 
+        filing_url = readable_filing_url(session, base, accession)
         state["buys"].append({
             "ticker": buy["ticker"], "company": buy["company"], "name": name,
             "role": role_text(buy["owner"]["roles"]), "value": round(buy["value"], 2),
-            "date": buy["trade_date"] or today, "accession": accession,
+            "date": buy["trade_date"] or today, "accession": accession, "url": filing_url,
+            "price": round(buy["avg_price"], 4),
         })
 
         if posted >= limit:
             continue
-        filing_url = readable_filing_url(session, base, accession)
         post_discord(webhook, build_embed(buy, today, filing_url), image)
         posted += 1
         log(f"  posted {buy['ticker']} {name} {money(buy['value'])}")
@@ -549,7 +553,8 @@ def run():
         if cluster_webhook and not bootstrap:
             cluster = find_cluster(state, buy["ticker"], buy["trade_date"] or today)
             if cluster:
-                post_discord(cluster_webhook, build_cluster_embed(buy["ticker"], buy["company"], cluster, buy.get("exchange"), buy))
+                cluster_img = make_cluster_chart(buy["ticker"], cluster, buy.get("exchange"))
+                post_discord(cluster_webhook, build_cluster_embed(buy["ticker"], buy["company"], cluster, buy.get("exchange"), buy), cluster_img)
                 log(f"  cluster alert {buy['ticker']}")
 
     if newest_time is not None:

@@ -14,6 +14,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.transforms import offset_copy
 import requests
 
 PRICE_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?range={range}&interval=1d"
@@ -125,6 +126,101 @@ def render_chart(ticker, rows, buy_start, buy_end, avg_price, exchange=None):
     fig.savefig(buf, format="png", facecolor=BG)
     plt.close(fig)
     return buf.getvalue()
+
+
+def _close_on(rows, day):
+    """Closing price on `day` (or the nearest trading day before it)."""
+    best = None
+    for r in rows:
+        if r[0] <= day:
+            best = r[4]
+    return best if best is not None else rows[0][4]
+
+
+def render_cluster_chart(ticker, rows, buys, exchange=None):
+    """
+    Chart for a cluster buy: one numbered marker per insider at the day and
+    price they bought, plus a legend 'Name (role) · $value'. Returns PNG bytes.
+    """
+    dates = [mdates.date2num(r[0]) for r in rows]
+    fig, ax = plt.subplots(figsize=(8, 4.6), dpi=120)
+    fig.patch.set_facecolor(BG)
+    ax.set_facecolor(PANEL)
+
+    width = 0.6
+    for d, (_, o, h, l, c) in zip(dates, rows):
+        color = UP if c >= o else DOWN
+        ax.vlines(d, l, h, color=color, linewidth=0.8)
+        ax.add_patch(plt.Rectangle((d - width / 2, min(o, c)), width, max(abs(c - o), 1e-6),
+                                   facecolor=color, edgecolor=color, linewidth=0.5))
+
+    points = []
+    for b in buys:
+        try:
+            day = datetime.fromisoformat(b["date"]).date()
+        except (KeyError, ValueError):
+            continue
+        price = b.get("price") or _close_on(rows, day)
+        points.append((mdates.date2num(day), price, b))
+    if points:
+        first = min(p[0] for p in points)
+        last_day = max(p[0] for p in points)
+        ax.axvspan(first - 0.6, last_day + 0.6, color=BUY, alpha=0.15, zorder=0)
+        legend = []
+        # numbered badges in one row above the buys, each linked to its own dot
+        ordered = sorted(points, key=lambda p: p[0])
+        n = len(ordered)
+        xc = sum(p[0] for p in ordered) / n
+        ytop = max(max(p[1] for p in ordered), max(r[2] for r in rows[-30:]))
+        for i, (x, y, b) in enumerate(ordered, start=1):
+            ax.plot([x], [y], marker="o", markersize=5, markerfacecolor=BUY,
+                    markeredgecolor=BG, markeredgewidth=1, zorder=5)
+            badge_pos = offset_copy(ax.transData, fig=fig, x=(i - 1 - (n - 1) / 2) * 22 - 14, y=28, units="points")
+            ax.annotate(str(i), xy=(x, y), xytext=(xc, ytop), textcoords=badge_pos,
+                        ha="center", va="center", color=BG, fontsize=8, fontweight="bold", zorder=6,
+                        bbox=dict(boxstyle="circle,pad=0.3", facecolor=BUY, edgecolor=BG),
+                        arrowprops=dict(arrowstyle="-", color=BUY, lw=0.9, alpha=0.8))
+            legend.append(f"{i}. {b['name']} ({b['role']}) · \\${b['value'] / 1000:,.0f}K")
+        ax.text(0.01, 0.97, "\n".join(legend), transform=ax.transAxes, va="top", ha="left",
+                color=TEXT, fontsize=8, linespacing=1.5,
+                bbox=dict(boxstyle="round,pad=0.5", facecolor=BG, edgecolor=BUY, alpha=0.9))
+
+    lo, hi = min(r[3] for r in rows), max(r[2] for r in rows)
+    ax.set_ylim(lo - (hi - lo) * 0.04, hi + (hi - lo) * 0.18)
+    last = rows[-1][4]
+    label = f"{exchange}: \\${ticker}" if exchange else f"\\${ticker}"
+    ax.set_title(f"{label}  ·  Cluster buy: {len(points)} insiders  ·  now \\${last:,.2f}",
+                 color=TEXT, fontsize=11, loc="left", pad=10, fontweight="bold")
+
+    ax.xaxis.set_major_locator(mdates.MonthLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
+    ax.yaxis.tick_right()
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"\\${v:,.2f}" if v < 100 else f"\\${v:,.0f}"))
+    ax.tick_params(colors=MUTED, labelsize=8)
+    ax.grid(True, color=GRID, linewidth=0.5)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.set_xlim(dates[0] - 1, dates[-1] + 2)
+
+    fig.text(0.01, 0.015, "Insider Radar · Source: SEC Form 4 · Not financial advice",
+             color=MUTED, fontsize=7)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", facecolor=BG)
+    plt.close(fig)
+    return buf.getvalue()
+
+
+def make_cluster_chart(ticker, buys, exchange=None):
+    """Return PNG bytes or None. Never raises."""
+    try:
+        rows, ex = fetch_prices(ticker)
+        if len(rows) < 10:
+            return None
+        return render_cluster_chart(ticker, rows, buys, exchange or ex)
+    except Exception as e:
+        print(f"  cluster chart skipped for {ticker}: {e}", flush=True)
+        return None
 
 
 def make_chart(ticker, buy_start, buy_end, avg_price):
