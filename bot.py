@@ -105,6 +105,20 @@ def money(value):
 
 BAD_TICKERS = {"NONE", "N/A", "NA", "-", "--", "NULL"}   # filings for unlisted securities
 
+
+def clean_ticker(raw):
+    """
+    Filers sometimes type the symbol oddly: 'NYSE:FLG', '$FLG', 'FLG, FLG-PA',
+    'Nasdaq: ABC'. Return just the plain symbol ('FLG'), or '' if none.
+    """
+    t = (raw or "").strip().upper().replace("$", "").replace('"', "")
+    if t in BAD_TICKERS:
+        return t
+    if ":" in t:
+        t = t.rsplit(":", 1)[1]
+    t = re.split(r"[\s,;/]+", t.strip())[0] if t.strip() else ""
+    return t if re.fullmatch(r"[A-Z0-9][A-Z0-9.\-]{0,9}", t) else ""
+
 ENTITY_WORDS = {"INC", "LLC", "LP", "LLP", "LTD", "LIMITED", "CORP", "CORPORATION", "CO", "COMPANY",
                 "FUND", "FUNDS", "TRUST", "CAPITAL", "MANAGEMENT", "PARTNERS", "HOLDINGS", "GROUP",
                 "BANK", "INSURANCE", "ADVISORS", "ADVISERS", "INVESTMENTS", "INVESTMENT", "FOUNDATION",
@@ -275,7 +289,7 @@ def parse_form4(xml_text):
     """Return a dict describing the filing's open-market purchases, or None."""
     root = ET.fromstring(xml_text)
 
-    ticker = _text(root, "issuer/issuerTradingSymbol").upper()
+    ticker = clean_ticker(_text(root, "issuer/issuerTradingSymbol"))
     company = _text(root, "issuer/issuerName")
     try:
         issuer_cik = int(_text(root, "issuer/issuerCik") or 0) or None

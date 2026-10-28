@@ -34,7 +34,7 @@ from datetime import date, datetime, timedelta, timezone
 
 import requests
 
-from bot import (ALLOWED_EXCHANGES, BAD_TICKERS, money, nice_company, nice_name,
+from bot import (ALLOWED_EXCHANGES, BAD_TICKERS, clean_ticker, money, nice_company, nice_name,
                  post_discord, role_text)
 from chart import fetch_prices, render_chart
 from company import company_info
@@ -106,7 +106,7 @@ def load_buys(session, zip_url, oldest, newest):
         if (row.get("DOCUMENT_TYPE") or "").strip() != "4":
             continue
         filed = parse_date(row.get("FILING_DATE"))
-        ticker = (row.get("ISSUERTRADINGSYMBOL") or "").strip().upper()
+        ticker = clean_ticker(row.get("ISSUERTRADINGSYMBOL"))
         if not filed or not (oldest <= filed <= newest) or not ticker or ticker in BAD_TICKERS:
             continue
         if (row.get("AFF10B5ONE") or "").strip() == "1":

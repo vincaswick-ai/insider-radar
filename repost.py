@@ -16,7 +16,7 @@ import sys
 
 import requests
 
-from bot import (ARCHIVE_URL, CLUSTER_WINDOW_DAYS, build_cluster_embed, fetch_form4_xml, http_get,
+from bot import (ARCHIVE_URL, clean_ticker, CLUSTER_WINDOW_DAYS, build_cluster_embed, fetch_form4_xml, http_get,
                  load_state, log, nice_name, parse_form4, post_discord, readable_filing_url, role_text)
 from chart import fetch_prices, make_cluster_chart
 from company import company_info
@@ -33,7 +33,7 @@ def issuer_cik(session, ticker):
 
 
 def main():
-    ticker = os.environ.get("TICKER", "").strip().upper().lstrip("$")
+    ticker = clean_ticker(os.environ.get("TICKER", ""))
     target = os.environ.get("TARGET", "test").strip().lower()
     agent = os.environ.get("SEC_USER_AGENT", "").strip()
     if not ticker:
