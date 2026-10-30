@@ -1,0 +1,42 @@
+name: Screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "Page URLs, separated by spaces"
+        required: true
+      max_height:
+        description: "Max page height to capture (CSS px)"
+        default: "3000"
+
+permissions:
+  contents: write
+
+jobs:
+  shoot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Take screenshots
+        run: python shots.py
+        env:
+          URLS: ${{ inputs.urls }}
+          MAX_HEIGHT: ${{ inputs.max_height }}
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+      - name: Save screenshots
+        run: |
+          git config user.name "insider-radar-bot"
+          git config user.email "insider-radar-bot@users.noreply.github.com"
+          git add shots/
+          git commit -m "Add screenshots [skip ci]" || echo "nothing to commit"
+          git pull --rebase
+          git push
