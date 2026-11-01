@@ -12,13 +12,17 @@ just without that line.
 
 import re
 import time
-from datetime import date, datetime, timedelta, timezone
+import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta, timezone
 
 import requests
 
 OWNER_URL = ("https://www.sec.gov/cgi-bin/own-disp?action=getowner&CIK={cik:010d}"
              "&type=&dateb=&owner=include&start=0")
-FINRA_URL = "https://api.finra.org/data/group/otcMarket/name/consolidatedShortInterest"
+SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
+FINRA_URL ="https://api.finra.org/data/group/otcMarket/name/consolidatedShortInterest"
+
+SPREE_DAYS = 14
 
 TOP_ROLES = ("chief executive", "ceo", "chief financial", "cfo", "president", "chair", "founder")
 
@@ -52,19 +56,82 @@ def _cells(row_html):
     return [re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ").strip() for c in cells]
 
 
+def sec_get(session, url, tries=3):
+    """GET with a short back-off: SEC's older pages sometimes answer 503/429 for a moment."""
+    for i in range(tries):
+        time.sleep(0.15 + 2 * i)
+        r = session.get(url, timeout=30)
+        if r.status_code in (429, 500, 502, 503) and i < tries - 1:
+            continue
+        r.raise_for_status()
+        return r
+
+
+def raw_form4_url(cik, accession, primary_doc):
+    """'xslF345X05/form4.xml' is the styled view; the raw XML has the same name without the folder."""
+    doc = re.sub(r"^xslF345X\d+/", "", primary_doc or "")
+    return f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accession.replace('-', '')}/{doc}"
+
+
+def recent_form4s(session, cik, limit):
+    """[(accession, filing_date, raw_xml_url)] of a CIK's newest Form 4s (owner or company)."""
+    data = sec_get(session, SUBMISSIONS_URL.format(cik=int(cik))).json()
+    rec = (data.get("filings") or {}).get("recent") or {}
+    out = []
+    for form, acc, filed, doc in zip(rec.get("form", []), rec.get("accessionNumber", []),
+                                     rec.get("filingDate", []), rec.get("primaryDocument", [])):
+        if form == "4" and doc.lower().endswith(".xml"):
+            out.append((acc, filed, raw_form4_url(cik, acc, doc)))
+            if len(out) >= limit:
+                break
+    return out
+
+
+def _buy_days_in_xml(xml_text, issuer_cik):
+    """Dates of open-market purchases in one Form 4 for this issuer."""
+    root = ET.fromstring(xml_text)
+    try:
+        if int((root.findtext("issuer/issuerCik") or "0").strip()) != int(issuer_cik):
+            return set()
+    except ValueError:
+        return set()
+    days = set()
+    for tx in root.findall("nonDerivativeTable/nonDerivativeTransaction"):
+        if (tx.findtext("transactionCoding/transactionCode") or "").strip() != "P":
+            continue
+        d = _day((tx.findtext("transactionDate/value") or "").strip())
+        if d:
+            days.add(d)
+    return days
+
+
+def past_buys_from_filings(session, owner_cik, issuer_cik, before, limit=30):
+    """Fallback: open the insider's latest Form 4s one by one (slower, shorter history)."""
+    days = set()
+    for acc, filed, url in recent_form4s(session, owner_cik, limit):
+        try:
+            days |= {d for d in _buy_days_in_xml(sec_get(session, url).text, issuer_cik) if d < before}
+        except Exception:
+            continue
+    return sorted(days, reverse=True)
+
+
 def past_buys(session, owner_cik, issuer_cik, before):
     """
     Dates of this insider's earlier open-market buys (code P) of this company,
-    newest first. Reads SEC's 'ownership by owner' page (latest 80 transactions).
+    newest first. Reads SEC's 'ownership by owner' page (latest 80 transactions);
+    if that page is unavailable, falls back to opening their recent Form 4s.
     """
     if not owner_cik or not issuer_cik or not before:
         return []
-    time.sleep(0.15)
-    r = session.get(OWNER_URL.format(cik=int(owner_cik)), timeout=30)
-    r.raise_for_status()
-    m = re.search(r'<table[^>]*id="transaction-report"[^>]*>(.*?)</table>', r.text, re.S | re.I)
+    try:
+        html = sec_get(session, OWNER_URL.format(cik=int(owner_cik))).text
+    except Exception as e:
+        log(f"  ownership page unavailable ({e}), reading recent filings instead")
+        return past_buys_from_filings(session, owner_cik, issuer_cik, before)
+    m = re.search(r'<table[^>]*id="transaction-report"[^>]*>(.*?)</table>', html, re.S | re.I)
     if not m:
-        return []
+        return past_buys_from_filings(session, owner_cik, issuer_cik, before)
     days = set()
     for row in re.findall(r"<tr[^>]*>(.*?)</tr>", m.group(1), re.S | re.I):
         c = _cells(row)
@@ -85,8 +152,9 @@ def past_buys(session, owner_cik, issuer_cik, before):
 def track_record(session, owner_cik, issuer_cik, trade_date, rows):
     """{'count', 'first', 'last', 'last_price', 'ret'} or None if no earlier buys."""
     before = _day(trade_date) or datetime.now(timezone.utc).date()
+    # buys in the same buying spree (last 14 days) are not a "track record"
     try:
-        days = past_buys(session, owner_cik, issuer_cik, before)
+        days = past_buys(session, owner_cik, issuer_cik, before - timedelta(days=SPREE_DAYS))
     except Exception as e:
         log(f"  track record unavailable: {e}")
         return None
@@ -187,10 +255,13 @@ def insider_score(buy, drop=None, others_in_cluster=0, record=None, short=None):
         why.append("big buy")
 
     sc = buy.get("stake_change")
-    if sc is None or sc >= 50:
+    if buy.get("new_position"):
         pts += 1.5
-        why.append("new position" if sc is None else "stake +50%")
-    elif sc >= 10:
+        why.append("new position")
+    elif sc is not None and sc >= 50:
+        pts += 1.5
+        why.append("stake +50%")
+    elif sc is not None and sc >= 10:
         pts += 1
 
     if drop is not None:

@@ -168,6 +168,8 @@ def nice_company(raw):
         for w in raw.split():
             if w in {"INC", "INC.", "CORP", "CORP.", "LLC", "LTD", "PLC", "CO", "CO.", "LP", "NV", "SA", "AG"}:
                 words.append(w.title() if w not in {"LLC", "PLC", "LP", "NV", "SA", "AG"} else w)
+            elif len(w) <= 3 and not re.search(r"[AEIOUY]", w):
+                words.append(w)            # abbreviations like HF, PNC, JPM stay upper case
             else:
                 words.append(w.title())
         return " ".join(words)
@@ -348,6 +350,8 @@ def parse_form4(xml_text):
 
     owned_before = owned_after - shares
     stake_change = (shares / owned_before * 100) if owned_before > 0 else None
+    # only a real "new position" if the filing reports the holding after the buy
+    new_position = owned_after > 0 and owned_before <= shares * 0.001
 
     return {
         "ticker": ticker,
@@ -363,6 +367,7 @@ def parse_form4(xml_text):
         "trade_date": min(dates) if dates else "",
         "trade_date_end": max(dates) if dates else "",
         "plan_10b5_1": plan,
+        "new_position": new_position,
     }
 
 
@@ -392,8 +397,10 @@ def summary_line(buy):
     line = (f"{who} bought **{money(buy['value'])}** of "
             f"**{nice_company(buy['company'])}** (**{ticker_label(buy)}**) stock with their own money.")
     sc = buy["stake_change"]
-    if sc is None:
+    if buy.get("new_position"):
         line += " This looks like a **brand-new position** for them."
+    elif sc is None:
+        pass
     elif sc >= 100:
         line += f" That **more than doubles** their stake (+{sc:.0f}%)."
     elif sc >= 10:

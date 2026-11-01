@@ -22,6 +22,7 @@ from bot import (add_score, build_embed, clean_ticker, fetch_form4_xml, http_get
 from chart import make_chart
 from company import company_info
 from repost import issuer_cik
+from score import recent_form4s
 
 ISSUER_URL = ("https://www.sec.gov/cgi-bin/own-disp?action=getissuer&CIK={cik:010d}"
               "&type=P&dateb=&owner=include&start=0")
@@ -29,7 +30,11 @@ ISSUER_URL = ("https://www.sec.gov/cgi-bin/own-disp?action=getissuer&CIK={cik:01
 
 def latest_buy_filings(session, cik, limit=10):
     """(accession, folder_cik) of the issuer's most recent open-market purchase filings, newest first."""
-    html = http_get(ISSUER_URL.format(cik=cik), session).text
+    try:
+        html = http_get(ISSUER_URL.format(cik=cik), session).text
+    except Exception as e:
+        log(f"  issuer page unavailable ({e}), using the SEC JSON API instead")
+        return [(acc, str(cik)) for acc, _, _ in recent_form4s(session, cik, 60)]
     m = re.search(r'<table[^>]*id="transaction-report"[^>]*>(.*?)</table>', html, re.S | re.I)
     out = []
     for row in re.findall(r"<tr[^>]*>(.*?)</tr>", m.group(1) if m else "", re.S | re.I):
@@ -62,8 +67,12 @@ def main():
 
     buy = base = acc = None
     for acc, folder in latest_buy_filings(session, cik):
-        xml_text, base = fetch_form4_xml(session, acc, folder)
-        buy = parse_form4(xml_text) if xml_text else None
+        try:
+            xml_text, base = fetch_form4_xml(session, acc, folder)
+            buy = parse_form4(xml_text) if xml_text else None
+        except Exception as e:
+            log(f"  skip {acc}: {e}")
+            buy = None
         if buy:
             break
     if not buy:
