@@ -29,6 +29,7 @@ import requests
 
 from chart import make_chart, make_cluster_chart
 from company import company_info
+from score import drop_from_high, insider_score, score_bar, short_interest, track_record
 
 # ---------------------------------------------------------------- settings
 
@@ -299,6 +300,10 @@ def parse_form4(xml_text):
     owners = []
     for ro in root.findall("reportingOwner"):
         name = _text(ro, "reportingOwnerId/rptOwnerName")
+        try:
+            owner_cik = int(_text(ro, "reportingOwnerId/rptOwnerCik") or 0) or None
+        except ValueError:
+            owner_cik = None
         rel = ro.find("reportingOwnerRelationship")
         roles = []
         if _text(rel, "isOfficer") in ("1", "true"):
@@ -310,7 +315,14 @@ def parse_form4(xml_text):
             roles.append("10% Owner")
         if not roles and _text(rel, "isOther") in ("1", "true"):
             roles.append(_text(rel, "otherText") or "Insider")
-        owners.append({"name": name, "roles": roles})
+        owners.append({"name": name, "roles": roles, "cik": owner_cik})
+
+    # Pre-planned trades (Rule 10b5-1) are a weaker signal: newer filings have a
+    # checkbox for it, older ones only mention it in a footnote.
+    plan = _text(root, "aff10b5One").lower() in ("1", "true")
+    if not plan:
+        notes = " ".join((f.text or "") for f in root.iter("footnote"))
+        plan = bool(re.search(r"(?<!not )(?<!not made )pursuant to (?:a |an )?(?:rule )?10b5-1", notes, re.I))
 
     shares = value = 0.0
     owned_after = 0.0
@@ -350,6 +362,7 @@ def parse_form4(xml_text):
         "stake_change": stake_change,
         "trade_date": min(dates) if dates else "",
         "trade_date_end": max(dates) if dates else "",
+        "plan_10b5_1": plan,
     }
 
 
@@ -388,6 +401,47 @@ def summary_line(buy):
     return line
 
 
+def ordinal(n):
+    return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
+
+
+def score_text(buy):
+    if not buy.get("score"):
+        return ""
+    reasons = " · ".join(buy.get("score_why") or [])
+    return (f"🎯 **Insider Score: {buy['score']}/10**  {score_bar(buy['score'])}"
+            + (f"\n*{reasons}*" if reasons else "") + "\n\n")
+
+
+def record_text(buy):
+    rec = buy.get("record")
+    if not rec:
+        return ""
+    nth = ordinal(rec["count"] + 1)
+    since = rec["first"].strftime("%b %Y")
+    line = f"\n\n🔁 **Track record:** "
+    if rec.get("ret") is not None:
+        sign = "+" if rec["ret"] >= 0 else ""
+        line += (f"their last buy ({rec['last']:%b %d, %Y}) is **{sign}{rec['ret'] * 100:.0f}%** since. "
+                 f"This is their **{nth} buy** since {since}.")
+    else:
+        line += f"this is their **{nth} buy** since {since}."
+    return line
+
+
+def short_text(short):
+    if not short:
+        return None
+    parts = []
+    if short.get("pct") is not None:
+        parts.append(f"{short['pct'] * 100:.1f}% of shares")
+    else:
+        parts.append(f"{short['shares'] / 1e6:,.1f}M shares")
+    if short.get("days_to_cover"):
+        parts.append(f"{float(short['days_to_cover']):.1f} days to cover")
+    return " · ".join(parts)
+
+
 def build_embed(buy, filed_date, filing_url):
     trade = buy["trade_date"]
     if buy["trade_date_end"] and buy["trade_date_end"] != trade:
@@ -404,13 +458,23 @@ def build_embed(buy, filed_date, filing_url):
     cap = cap_text(buy)
     if cap:
         fields.append({"name": "Market cap", "value": cap, "inline": True})
+    if buy.get("drop") is not None:
+        d = buy["drop"]
+        fields.append({"name": "From 52w high", "value": "at the high" if d < 0.005 else f"-{d * 100:.0f}%",
+                       "inline": True})
+    si = short_text(buy.get("short"))
+    if si:
+        fields.append({"name": "Short interest", "value": si, "inline": True})
+    if buy.get("plan_10b5_1"):
+        fields.append({"name": "Note", "value": "Pre-planned trade (Rule 10b5-1)", "inline": True})
     title = f"💼 Insider Buy · ${buy['ticker']}" + (f" ({buy['exchange']})" if buy.get("exchange") else "")
     if buy.get("sp500"):
         title += " · ⭐ S&P 500"
     return {
         "title": title,
         "url": filing_url,
-        "description": summary_line(buy) + f"\n\n📄 [View the official SEC filing]({filing_url})",
+        "description": (score_text(buy) + summary_line(buy) + record_text(buy)
+                        + f"\n\n📄 [View the official SEC filing]({filing_url})"),
         "color": 0x2ECC71,
         "fields": fields,
         "footer": {"text": "📡 Insider Radar · Source: SEC Form 4 · Not financial advice"},
@@ -492,6 +556,27 @@ def find_cluster(state, ticker, today):
     return sorted(latest_per_insider.values(), key=lambda b: b["date"])
 
 
+def other_insiders(state, ticker, name, day):
+    """How many OTHER insiders bought this stock in the cluster window."""
+    since = (datetime.fromisoformat(day) - timedelta(days=CLUSTER_WINDOW_DAYS)).date().isoformat()
+    return len({b["name"] for b in state["buys"]
+                if b["ticker"] == ticker and b["date"] >= since and b["name"] != name})
+
+
+def add_score(session, buy, rows, state, name, today):
+    """Fill buy['drop'], ['record'], ['short'], ['score'], ['score_why']. Never raises."""
+    try:
+        buy["drop"] = drop_from_high(rows)
+        buy["record"] = track_record(session, buy["owner"].get("cik"), buy.get("issuer_cik"),
+                                     buy["trade_date"], rows)
+        buy["short"] = short_interest(buy["ticker"], buy.get("shares_out"))
+        others = other_insiders(state, buy["ticker"], name, buy["trade_date"] or today)
+        buy["score"], buy["score_why"] = insider_score(buy, buy["drop"], others, buy["record"], buy["short"])
+        log(f"  score {buy['score']}/10 ({', '.join(buy['score_why'])})")
+    except Exception as e:
+        log(f"  score skipped: {e}")
+
+
 # ---------------------------------------------------------------- main
 
 def run():
@@ -537,7 +622,7 @@ def run():
         buys_found += 1
 
         # price chart + which exchange the stock trades on
-        image, buy["exchange"], last_price = make_chart(buy["ticker"], buy["trade_date"], buy["trade_date_end"], buy["avg_price"])
+        image, buy["exchange"], last_price, rows = make_chart(buy["ticker"], buy["trade_date"], buy["trade_date_end"], buy["avg_price"])
         name = nice_name(buy["owner"]["name"])
         if SKIP_OTC and buy["exchange"] and buy["exchange"] not in ALLOWED_EXCHANGES:
             log(f"  skip {buy['ticker']} {name} {money(buy['value'])}: listed on {buy['exchange']}")
@@ -560,6 +645,11 @@ def run():
 
         if posted >= limit:
             continue
+
+        # Insider Score + the facts behind it (each piece is optional)
+        add_score(session, buy, rows, state, name, today)
+        if buy.get("score"):
+            state["buys"][-1]["score"] = buy["score"]     # kept for the future leaderboard / portfolio
         post_discord(webhook, build_embed(buy, today, filing_url), image)
         posted += 1
         log(f"  posted {buy['ticker']} {name} {money(buy['value'])}")

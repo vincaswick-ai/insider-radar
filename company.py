@@ -90,10 +90,11 @@ def size_label(market_cap):
 
 def company_info(session, cik, ticker, last_price):
     """Return {'market_cap': float|None, 'size': str|None, 'sp500': bool}."""
-    info = {"market_cap": None, "size": None, "sp500": False}
+    info = {"market_cap": None, "size": None, "sp500": False, "shares_out": None}
     info["sp500"] = is_sp500(session, cik, ticker)
     if last_price:
         shares = shares_outstanding(session, cik)
+        info["shares_out"] = shares
         if shares:
             cap = shares * last_price
             info["market_cap"] = cap

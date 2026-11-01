@@ -8,7 +8,7 @@ and the bot simply posts the alert without a chart.
 """
 
 import io
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import matplotlib
 matplotlib.use("Agg")
@@ -224,15 +224,21 @@ def make_cluster_chart(ticker, buys, exchange=None):
 
 
 def make_chart(ticker, buy_start, buy_end, avg_price):
-    """Return (png_bytes or None, exchange or None, last_price or None). Never raises."""
+    """
+    Return (png_bytes or None, exchange or None, last_price or None, rows). Never raises.
+    rows = ~5 years of daily prices (used for the 52-week high and the track record);
+    the chart itself shows the last 6 months.
+    """
     exchange = last_price = None
+    rows = []
     try:
-        rows, exchange = fetch_prices(ticker)
+        rows, exchange = fetch_prices(ticker, "5y")
         if rows:
             last_price = rows[-1][4]
-        if len(rows) < 10:
-            return None, exchange, last_price
-        return render_chart(ticker, rows, buy_start, buy_end, avg_price, exchange), exchange, last_price
+        recent = [r for r in rows if r[0] >= rows[-1][0] - timedelta(days=183)] if rows else []
+        if len(recent) < 10:
+            return None, exchange, last_price, rows
+        return render_chart(ticker, recent, buy_start, buy_end, avg_price, exchange), exchange, last_price, rows
     except Exception as e:
         print(f"  chart skipped for {ticker}: {e}", flush=True)
-        return None, exchange, last_price
+        return None, exchange, last_price, rows
