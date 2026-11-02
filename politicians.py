@@ -551,12 +551,16 @@ def run():
             continue
         else:
             sic = load_sic(state, {t["ticker"] for t in trades})
+            member_comms = comms.get(member_id(legis, f["last"], f["state"]))
+            for t in trades:
+                m = committee_match((sic.get(t["ticker"]) or [None])[0], member_comms)
+                t["match"] = list(m) if m else None
             embed = build_embed(f, label, trades, prices, comms.get(member_id(legis, f["last"], f["state"])), sic)
             for t in trades:
                 state["trades"].append({"who": label, "ticker": t["ticker"], "type": t["type"],
                                         "date": t["date"].isoformat() if t["date"] else None,
                                         "amount": t["amount"], "filed": f["filed"].isoformat(),
-                                        "url": f["url"]})
+                                        "url": f["url"], "match": t.get("match")})
         if DEBUG:
             log(json.dumps(embed, indent=1, default=str))
         else:

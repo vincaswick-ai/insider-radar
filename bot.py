@@ -647,7 +647,7 @@ def run():
             "ticker": buy["ticker"], "company": buy["company"], "name": name,
             "role": role_text(buy["owner"]["roles"]), "value": round(buy["value"], 2),
             "date": buy["trade_date"] or today, "accession": accession, "url": filing_url,
-            "price": round(buy["avg_price"], 4),
+            "price": round(buy["avg_price"], 4), "filed": today,
         })
 
         if posted >= limit:
