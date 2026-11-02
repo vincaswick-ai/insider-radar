@@ -33,7 +33,8 @@ from score import SPREE_DAYS, close_on, past_buys
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE_FILE = os.path.join(HERE, "lb_cache.json")
 LB_DAYS = int(os.environ.get("LB_DAYS") or 365)
-MIN_POL_BUYS = 3
+MIN_POL_BUYS = 5
+MIN_AGE_DAYS = 60          # an earlier insider buy must be this old to count as a track record
 TOP_N = 10
 MEDALS = ["🥇", "🥈", "🥉"]
 
@@ -192,11 +193,14 @@ def insider_board(prices):
                 continue
             day = date.fromisoformat(buy["trade_date"])
             past = past_buys(session, buy["owner"].get("cik"), ciks[ticker], day - timedelta(days=SPREE_DAYS))
-            starts = sprees(past)
+            starts = [d for d in sprees(past) if (day - d).days >= MIN_AGE_DAYS]
             rets = [r for r in (prices.since(ticker, d) for d in starts) if r is not None]
             if not rets:
                 continue
-            rows.append({"name": nice_name(buy["owner"]["name"]), "role": b["role"], "ticker": ticker,
+            name = nice_name(buy["owner"]["name"])
+            if any(r["name"] == name and r["ticker"] == ticker for r in rows):
+                continue
+            rows.append({"name": name, "role": b["role"], "ticker": ticker,
                          "value": buy["value"], "date": buy["trade_date"], "n": len(rets),
                          "avg": sum(rets) / len(rets), "wins": sum(1 for r in rets if r > 0) / len(rets),
                          "first": starts[-1]})
