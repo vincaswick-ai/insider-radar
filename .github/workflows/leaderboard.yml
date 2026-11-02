@@ -1,0 +1,50 @@
+name: Leaderboard
+
+on:
+  schedule:
+    # Sundays 16:20 UTC (18:20 in Vilnius)
+    - cron: "20 16 * * 0"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Where to post"
+        type: choice
+        options: [test, public]
+        default: test
+
+permissions:
+  contents: write
+
+concurrency:
+  group: leaderboard
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Build and post leaderboard
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          WEBHOOK_LEADERBOARD: ${{ secrets.WEBHOOK_LEADERBOARD }}
+          WEBHOOK_RECAP: ${{ secrets.WEBHOOK_RECAP }}
+          WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
+          TARGET: ${{ inputs.target || 'public' }}
+        run: python leaderboard.py
+      - name: Save cache
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain lb_cache.json)" ]; then
+            git config user.name "insider-radar-bot"
+            git config user.email "insider-radar-bot@users.noreply.github.com"
+            git add lb_cache.json
+            git commit -m "Update leaderboard cache [skip ci]"
+            git pull --rebase --autostash || true
+            git push
+          fi
