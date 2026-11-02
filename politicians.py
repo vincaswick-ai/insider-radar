@@ -276,8 +276,19 @@ def compact_amount(text):
     return text
 
 
+def amount_top(text):
+    nums = [float(x.replace("$", "").replace(",", "")) for x in re.findall(r"\$[\d,]+", text or "")]
+    return max(nums) if nums else 0
+
+
 def build_embed(filing, label, trades, prices):
-    lines, buys = [], 0
+    # purchases first, then the biggest amounts
+    trades = sorted(trades, key=lambda t: (t["type"] != "P", -amount_top(t["amount"])))
+    n_buy = sum(t["type"] == "P" for t in trades)
+    n_sell = sum(t["type"].startswith("S") for t in trades)
+    head = " · ".join(x for x in (f"**{n_buy} buy{'s' if n_buy != 1 else ''}**" if n_buy else "",
+                                  f"**{n_sell} sale{'s' if n_sell != 1 else ''}**" if n_sell else "") if x)
+    lines, buys = ([head, ""] if head else []), 0
     for t in trades[:MAX_LINES]:
         word = TYPE_WORD.get(t["type"], t["type"])
         icon = "🟢" if t["type"] == "P" else "🔴" if t["type"].startswith("S") else "⚪"
@@ -384,7 +395,9 @@ def run():
             log(f"  skip {f['id']} {label}: {e}")
             continue          # not marked as seen, try again next run
         if trades is None:
-            embed = paper_embed(f, label)
+            log(f"  {label}: paper filing, skipped ({f['url']})")
+            state["seen"].append(f["id"])
+            continue
         elif not trades:
             log(f"  {label}: no stock trades found in {f['url']}")
             state["seen"].append(f["id"])
