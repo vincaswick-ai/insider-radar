@@ -9,7 +9,11 @@
   "H20035563",
   "H20035689",
   "H20035710",
-  "H20035727"
+  "H20035727",
+  "H20035591",
+  "H20035734",
+  "H20035743",
+  "H20035484"
  ],
  "trades": [
   {
@@ -110,6 +114,149 @@
    "amount": "$1,001 - $15,000",
    "filed": "2026-10-29",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035727.pdf"
+  },
+  {
+   "who": "Thomas H. Kean, Jr. (R-NJ)",
+   "ticker": "ABT",
+   "type": "S (partial)",
+   "date": "2026-09-17",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-30",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035591.pdf",
+   "match": [
+    "Energy and Commerce",
+    "energy / health / telecom"
+   ]
+  },
+  {
+   "who": "Thomas H. Kean, Jr. (R-NJ)",
+   "ticker": "ESAB",
+   "type": "P",
+   "date": "2026-09-29",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-30",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035591.pdf",
+   "match": null
+  },
+  {
+   "who": "Thomas H. Kean, Jr. (R-NJ)",
+   "ticker": "JNJ",
+   "type": "S (partial)",
+   "date": "2026-09-30",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-30",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035591.pdf",
+   "match": [
+    "Energy and Commerce",
+    "energy / health / telecom"
+   ]
+  },
+  {
+   "who": "Thomas H. Kean, Jr. (R-NJ)",
+   "ticker": "MDLZ",
+   "type": "S (partial)",
+   "date": "2026-09-23",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-30",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035591.pdf",
+   "match": null
+  },
+  {
+   "who": "Thomas H. Kean, Jr. (R-NJ)",
+   "ticker": "SYK",
+   "type": "S (partial)",
+   "date": "2026-09-30",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-30",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035591.pdf",
+   "match": [
+    "Energy and Commerce",
+    "energy / health / telecom"
+   ]
+  },
+  {
+   "who": "Thomas H. Kean, Jr. (R-NJ)",
+   "ticker": "TXN",
+   "type": "P",
+   "date": "2026-09-17",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-30",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035591.pdf",
+   "match": null
+  },
+  {
+   "who": "John J. McGuire III (R-VA)",
+   "ticker": "AVGO",
+   "type": "S (partial)",
+   "date": "2026-09-24",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-01",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035484.pdf",
+   "match": null
+  },
+  {
+   "who": "John J. McGuire III (R-VA)",
+   "ticker": "MU",
+   "type": "P",
+   "date": "2026-09-24",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-01",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035484.pdf",
+   "match": null
+  },
+  {
+   "who": "John J. McGuire III (R-VA)",
+   "ticker": "MU",
+   "type": "P",
+   "date": "2026-09-25",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-01",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035484.pdf",
+   "match": null
+  },
+  {
+   "who": "John J. McGuire III (R-VA)",
+   "ticker": "MU",
+   "type": "P",
+   "date": "2026-10-01",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-01",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035484.pdf",
+   "match": null
   }
- ]
+ ],
+ "sic": {
+  "SYK": [
+   3841,
+   "Surgical & Medical Instruments & Apparatus"
+  ],
+  "ESAB": [
+   3569,
+   "General Industrial Machinery & Equipment, NEC"
+  ],
+  "JNJ": [
+   2834,
+   "Pharmaceutical Preparations"
+  ],
+  "MDLZ": [
+   2000,
+   "Food and Kindred Products"
+  ],
+  "ABT": [
+   2834,
+   "Pharmaceutical Preparations"
+  ],
+  "TXN": [
+   3674,
+   "Semiconductors & Related Devices"
+  ],
+  "AVGO": [
+   3674,
+   "Semiconductors & Related Devices"
+  ],
+  "MU": [
+   3674,
+   "Semiconductors & Related Devices"
+  ]
+ }
 }
