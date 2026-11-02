@@ -43,11 +43,14 @@ COMMITTEES = "https://unitedstates.github.io/congress-legislators/committees-cur
 MEMBERSHIP = "https://unitedstates.github.io/congress-legislators/committee-membership-current.json"
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
-LOOKBACK_DAYS = 10           # look at filings from the last N days each run
+LOOKBACK_DAYS = int(os.environ.get("POL_LOOKBACK_DAYS") or 10)           # look at filings from the last N days each run
 MAX_POSTS = 12               # safety cap per run
 BOOTSTRAP_POSTS = 3
 MAX_LINES = 10               # trades listed per alert
 DEBUG = os.environ.get("POL_DEBUG") == "1"
+TEST_ID = os.environ.get("POL_TEST_POST", "").strip()   # e.g. H20035563: post that one filing to the test channel
+if TEST_ID:
+    DEBUG = True
 SCAN_DAYS = int(os.environ.get("POL_SCAN_DAYS") or 0)   # >0: list committee matches, post nothing
 
 SEC_TICKERS = "https://www.sec.gov/files/company_tickers.json"
@@ -576,7 +579,7 @@ def run():
         new = new[-BOOTSTRAP_POSTS:]
         log("First run: posting only the newest few.")
     if DEBUG:
-        new = sources[-6:]          # debug: show the newest filings even if already posted
+        new = [x for x in sources if x[0]["id"] == TEST_ID] if TEST_ID else sources[-6:]
 
     prices, posted = {}, 0
     for f, src in new:
@@ -610,6 +613,9 @@ def run():
                                         "url": f["url"], "match": t.get("match")})
         if DEBUG:
             log(json.dumps(embed, indent=1, default=str))
+            if TEST_ID and os.environ.get("WEBHOOK_PROOF"):
+                post(os.environ["WEBHOOK_PROOF"], embed)
+                log("  posted to the test channel")
         else:
             post(webhook, embed)
             log(f"  posted {label} ({len(trades or [])} trades)")

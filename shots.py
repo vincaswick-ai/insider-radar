@@ -30,6 +30,16 @@ def main():
         ctx = browser.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=3,
                                   is_mobile=True, has_touch=True, user_agent=ua)
         for i, url in enumerate(urls):
+            if url.lower().split("?")[0].endswith(".pdf"):
+                # PDFs (e.g. Congress trade reports): render every page as a sharp PNG
+                import pypdfium2 as pdfium
+                data = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=60).content
+                pdf = pdfium.PdfDocument(data)
+                for n in range(len(pdf)):
+                    path = name_for(i, url).replace(".png", f"_p{n + 1}.png")
+                    pdf[n].render(scale=3).to_pil().save(path)
+                    print(f"saved {path}")
+                continue
             page = ctx.new_page()
             if "sec.gov" in url:
                 # SEC blocks headless browsers, so download the HTML like the bot does
