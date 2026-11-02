@@ -24,7 +24,7 @@ jobs:
           python-version: "3.12"
       - name: Install Playwright
         run: |
-          pip install playwright requests pypdfium2
+          pip install playwright requests pypdfium2 pillow
           python -m playwright install --with-deps chromium
       - name: Take screenshots
         run: python shots.py
