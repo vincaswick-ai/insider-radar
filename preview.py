@@ -73,6 +73,10 @@ def main():
         except Exception as e:
             log(f"  skip {acc}: {e}")
             buy = None
+        want = os.environ.get("NAME", "").strip().lower()
+        if buy and want and want not in buy["owner"]["name"].lower():
+            buy = None
+            continue
         if buy:
             break
     if not buy:
