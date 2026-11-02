@@ -17,6 +17,7 @@ Environment:
   LB_DAYS               politician lookback in days (default 365)
 """
 
+import io
 import json
 import os
 import time
@@ -26,7 +27,7 @@ import requests
 
 import politicians as pol
 from bot import fetch_form4_xml, load_state, money, nice_name, parse_form4
-from chart import fetch_prices
+from chart import BG, GRID, MUTED, PANEL, TEXT, fetch_prices
 from repost import issuer_cik
 from score import SPREE_DAYS, close_on, past_buys
 
@@ -35,7 +36,8 @@ CACHE_FILE = os.path.join(HERE, "lb_cache.json")
 LB_DAYS = int(os.environ.get("LB_DAYS") or 365)
 MIN_POL_BUYS = 5
 MIN_AGE_DAYS = 60          # an earlier insider buy must be this old to count as a track record
-TOP_N = 10
+TOP_N = 5
+LINE_COLORS = ["#f0b232", "#5865f2", "#23a55a", "#eb459e", "#00a8fc"]
 MEDALS = ["🥇", "🥈", "🥉"]
 
 
@@ -143,7 +145,8 @@ def politician_board(prices):
         edge = sum(p["ret"] - p["spy"] for p in picks) / len(picks)
         wins = sum(1 for p in picks if p["ret"] - p["spy"] > 0) / len(picks)
         best = max(picks, key=lambda p: p["ret"])
-        rows.append({"who": who, "n": len(picks), "avg": avg, "edge": edge, "wins": wins, "best": best})
+        rows.append({"who": who, "n": len(picks), "avg": avg, "edge": edge, "wins": wins, "best": best,
+                     "picks": picks})
     rows.sort(key=lambda r: -r["edge"])
     log(f"\n===== politicians ({len(rows)} with {MIN_POL_BUYS}+ different stocks bought) =====")
     for r in rows:
@@ -214,20 +217,118 @@ def insider_board(prices):
     return rows
 
 
+# ---------------------------------------------------------------- charts
+
+def short_who(who):
+    """'Josh Gottheimer (D-NJ)' -> 'Gottheimer (D-NJ)'."""
+    name, _, tag = who.partition(" (")
+    last = [w for w in name.replace(",", "").split() if w not in ("Jr.", "Jr", "Sr.", "II", "III", "IV")][-1]
+    return f"{last} ({tag}" if tag else last
+
+
+def copy_curve(picks, prices, days, ticker=None):
+    """% return over time of $1,000 put into every stock the member bought, on the day they bought it.
+    ticker='SPY' = the same money on the same days put into the S&P 500 instead."""
+    out = []
+    for d in days:
+        invested = value = 0.0
+        for p in picks:
+            if p["day"] > d:
+                continue
+            rows = prices.get(ticker or p["ticker"])
+            base, now = close_on(rows, p["day"]), close_on(rows, d)
+            if base and now:
+                invested += 1000
+                value += 1000 * now / base
+        out.append(value / invested - 1 if invested else None)
+    return out
+
+
+def _fig(width=8, height=4.4):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(width, height), dpi=150)
+    fig.patch.set_facecolor(BG)
+    ax.set_facecolor(PANEL)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    ax.tick_params(colors=MUTED, labelsize=9)
+    ax.grid(color=GRID, lw=0.6, alpha=0.6)
+    return plt, fig, ax
+
+
+def _png(plt, fig):
+    fig.tight_layout()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", facecolor=BG)
+    plt.close(fig)
+    return buf.getvalue()
+
+
+def politician_chart(rows, prices):
+    import matplotlib.dates as mdates
+    import matplotlib.ticker as mticker
+    spy = prices.get("SPY")
+    start = date.today() - timedelta(days=LB_DAYS)
+    days = [r[0] for r in spy if r[0] >= start]
+    if len(days) < 20:
+        return None
+    plt, fig, ax = _fig()
+    ax.axhline(0, color=MUTED, lw=2, ls="--", label="S&P 500 (same money, same days)")
+    for i, r in enumerate(rows[:TOP_N]):
+        mine = copy_curve(r["picks"], prices, days)
+        spx = copy_curve(r["picks"], prices, days, "SPY")
+        pts = [(d, (m - x) * 100) for d, m, x in zip(days, mine, spx) if m is not None and x is not None]
+        if pts:
+            ax.plot([p[0] for p in pts], [p[1] for p in pts], color=LINE_COLORS[i], lw=2.2,
+                    label=f"#{i + 1} {short_who(r['who'])}  {pts[-1][1]:+.1f}%")
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:+.0f}%"))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
+    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+    leg = ax.legend(loc="upper left", frameon=False, fontsize=9.5)
+    for t in leg.get_texts():
+        t.set_color(TEXT)
+    ax.set_title("Copying their stock buys: how far ahead of the S&P 500 you would be", color=TEXT,
+                 fontsize=11, loc="left")
+    fig.text(0.99, 0.01, "Insider Radar · House PTR filings, last 12 months · not financial advice",
+             color=MUTED, fontsize=7, ha="right")
+    return _png(plt, fig)
+
+
+def insider_chart(rows):
+    top = rows[:TOP_N]
+    if not top:
+        return None
+    plt, fig, ax = _fig(8, 3.6)
+    labels = [f"#{i + 1} {r['name']} · {r['ticker']}" for i, r in enumerate(top)][::-1]
+    vals = [r["avg"] * 100 for r in top][::-1]
+    colors = LINE_COLORS[:len(top)][::-1]
+    bars = ax.barh(labels, vals, color=colors, height=0.6)
+    for b, v in zip(bars, vals):
+        ax.text(b.get_width() + max(vals) * 0.01, b.get_y() + b.get_height() / 2, f"{v:+.0f}%",
+                va="center", color=TEXT, fontsize=10, fontweight="bold")
+    ax.set_xlim(min(0, min(vals)) * 1.1, max(vals) * 1.15)
+    ax.xaxis.set_visible(False)
+    ax.grid(False)
+    ax.tick_params(axis="y", colors=TEXT, labelsize=10, length=0)
+    ax.set_title("How their earlier buys of the same stock did (average)", color=TEXT, fontsize=11, loc="left")
+    fig.text(0.99, 0.01, "Insider Radar · SEC Form 4 · not financial advice", color=MUTED, fontsize=7, ha="right")
+    return _png(plt, fig)
+
+
 # ---------------------------------------------------------------- Discord
 
 def pol_embed(rows):
     lines = []
     for i, r in enumerate(rows[:TOP_N]):
         mark = MEDALS[i] if i < 3 else f"`{i + 1}.`"
-        lines.append(f"{mark} **{r['who']}**  {pct(r['edge'])} vs S&P 500\n"
-                     f"{r['n']} stocks · beat the market {r['wins'] * 100:.0f}% of the time · "
-                     f"best: ${r['best']['ticker']} {pct(r['best']['ret'])}")
+        lines.append(f"{mark} **{r['who']}** · **{pct(r['edge'])}** vs S&P 500 · {r['n']} stocks · "
+                     f"best ${r['best']['ticker']} {pct(r['best']['ret'])}")
     return {
         "title": "🏛️ Politician leaderboard: last 12 months",
-        "description": "Who in the House picks stocks best? Average return of each stock they bought "
-                       "since the trade day, minus what the S&P 500 did over the same days.\n\n"
-                       + "\n\n".join(lines),
+        "description": "Who in the House picks stocks best? Ranked by how much each stock they bought "
+                       "beat the S&P 500 over the same days.\n\n" + "\n".join(lines),
         "color": 0xF0B232,
         "footer": {"text": f"House members with {MIN_POL_BUYS}+ different stocks bought · "
                            "Senate not included · Not financial advice"},
@@ -239,28 +340,44 @@ def insider_embed(rows):
     for i, r in enumerate(rows[:TOP_N]):
         mark = MEDALS[i] if i < 3 else f"`{i + 1}.`"
         times = "buy" if r["n"] == 1 else "buys"
-        lines.append(f"{mark} **{r['name']}** ({r['role']}, ${r['ticker']})\n"
-                     f"Earlier {times}: {r['n']} · avg {pct(r['avg'])} · "
-                     f"just bought {money(r['value'])} on {r['date']}")
+        lines.append(f"{mark} **{r['name']}** ({r['role']}, ${r['ticker']}) · {r['n']} earlier {times} "
+                     f"**{pct(r['avg'])}** · just bought {money(r['value'])}")
     return {
         "title": "🧑‍💼 Insiders buying now with the best track record",
         "description": "Insiders from our alerts in the last 30 days who bought the same company before. "
-                       "How did their earlier buys do?\n\n" + "\n\n".join(lines),
+                       "How did their earlier buys do?\n\n" + "\n".join(lines),
         "color": 0x23A55A,
         "footer": {"text": "Earlier buys a few days apart count as one · Not financial advice"},
     }
 
 
-def post(webhook, embeds):
+def post(webhook, embeds, images):
+    """images: list of (filename, png bytes or None), one per embed."""
+    files = {}
+    for i, (embed, (fname, png)) in enumerate(zip(embeds, images)):
+        if png:
+            embed["image"] = {"url": f"attachment://{fname}"}
+            files[f"files[{i}]"] = (fname, png, "image/png")
     payload = {"username": "Insider Radar", "embeds": embeds}
     for _ in range(3):
-        r = requests.post(webhook, json=payload, timeout=30)
+        if files:
+            r = requests.post(webhook, data={"payload_json": json.dumps(payload)}, files=files, timeout=60)
+        else:
+            r = requests.post(webhook, json=payload, timeout=30)
         if r.status_code == 429:
             time.sleep(float(r.json().get("retry_after", 2)) + 0.5)
             continue
         r.raise_for_status()
         return
     raise RuntimeError("Discord kept rate-limiting the webhook")
+
+
+def safe(fn, *args):
+    try:
+        return fn(*args)
+    except Exception as e:
+        log(f"chart failed: {e}")
+        return None
 
 
 def main():
@@ -270,17 +387,19 @@ def main():
     else:
         webhook = os.environ.get("WEBHOOK_PROOF") or ""
     prices = Prices()
-    embeds = []
+    embeds, images = [], []
     try:
         p = politician_board(prices)
         if p:
             embeds.append(pol_embed(p))
+            images.append(("politicians.png", safe(politician_chart, p, prices)))
     except Exception as e:
         log(f"politician leaderboard failed: {e}")
     try:
         i = insider_board(prices)
         if i:
             embeds.append(insider_embed(i))
+            images.append(("insiders.png", safe(insider_chart, i)))
     except Exception as e:
         log(f"insider leaderboard failed: {e}")
     if not embeds:
@@ -289,7 +408,7 @@ def main():
     if not webhook.strip():
         log(f"No webhook for target '{target}', leaderboard not posted.")
         return
-    post(webhook.strip(), embeds)
+    post(webhook.strip(), embeds, images)
     log(f"Posted leaderboard to {target}.")
 
 
