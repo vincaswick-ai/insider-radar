@@ -6,6 +6,9 @@ on:
       ticker:
         description: "Ticker, e.g. DINO (posts its latest insider buy in the current alert format)"
         required: true
+      name:
+        description: "Optional: only this insider (part of the name, e.g. Wajid)"
+        default: ""
       target:
         description: "Where to post"
         type: choice
@@ -25,6 +28,7 @@ jobs:
         env:
           TICKER: ${{ inputs.ticker }}
           TARGET: ${{ inputs.target }}
+          NAME: ${{ inputs.name }}
           SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
           WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
           WEBHOOK_INSIDER_BUYS: ${{ secrets.WEBHOOK_INSIDER_BUYS }}
