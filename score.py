@@ -160,7 +160,12 @@ def track_record(session, owner_cik, issuer_cik, trade_date, rows):
         return None
     if not days:
         return None
-    out = {"count": len(days), "first": days[-1], "last": days[0], "last_price": None, "ret": None}
+    # buys a few days apart are one buying spree, so count sprees, not days
+    sprees = 1
+    for newer, older in zip(days, days[1:]):
+        if (newer - older).days > SPREE_DAYS:
+            sprees += 1
+    out = {"count": sprees, "first": days[-1], "last": days[0], "last_price": None, "ret": None}
     if rows:
         p = close_on(rows, days[0])
         if p:
