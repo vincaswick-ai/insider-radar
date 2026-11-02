@@ -10,6 +10,9 @@ on:
         description: "Debug: print what would be posted, post nothing"
         type: boolean
         default: false
+      test_post:
+        description: "Test: post one filing (e.g. H20035563) to #bot-testing"
+        default: ""
       scan_days:
         description: "Scan: list committee matches of the last N days (0 = normal run)"
         default: "0"
@@ -37,6 +40,9 @@ jobs:
           SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
           POL_DEBUG: ${{ inputs.debug && '1' || '0' }}
           POL_SCAN_DAYS: ${{ inputs.scan_days || '0' }}
+          POL_TEST_POST: ${{ inputs.test_post || '' }}
+          POL_LOOKBACK_DAYS: ${{ inputs.test_post && '30' || '10' }}
+          WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
         run: python politicians.py
       - name: Save state
         if: always() && (inputs.scan_days == '' || inputs.scan_days == '0' || inputs.scan_days == null)
