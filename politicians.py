@@ -49,6 +49,37 @@ BOOTSTRAP_POSTS = 3
 MAX_LINES = 10               # trades listed per alert
 DEBUG = os.environ.get("POL_DEBUG") == "1"
 
+SEC_TICKERS = "https://www.sec.gov/files/company_tickers.json"
+SEC_SUBMISSIONS = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
+
+# Which industries each committee oversees, as SEC SIC code ranges.
+# (keyword found in the committee name, short sector name, [(first SIC, last SIC), ...])
+DEFENSE = [(3480, 3489), (3720, 3729), (3730, 3732), (3760, 3769), (3812, 3812)]
+FINANCE = [(6000, 6799)]
+OIL_MINING = [(1000, 1499), (2911, 2911), (2990, 2999)]
+UTILITIES = [(4900, 4991)]
+HEALTH = [(2833, 2836), (3841, 3851), (5047, 5047), (5122, 5122), (6324, 6324), (8000, 8099), (8731, 8731)]
+TELECOM = [(4800, 4899)]
+TECH = [(3570, 3579), (3670, 3679), (7370, 7379)]
+FARM_FOOD = [(100, 999), (2000, 2099), (2870, 2879), (3523, 3523)]
+TRANSPORT = [(3710, 3716), (3720, 3729), (3740, 3743), (4000, 4799)]
+COMMITTEE_SECTORS = [
+    ("Armed Services", "defense", DEFENSE),
+    ("Intelligence", "defense / tech", DEFENSE + TECH),
+    ("Homeland Security", "defense / tech", DEFENSE + TECH),
+    ("Financial Services", "finance", FINANCE),
+    ("Banking", "finance", FINANCE),
+    ("Energy and Commerce", "energy / health / telecom", OIL_MINING + UTILITIES + HEALTH + TELECOM),
+    ("Energy and Natural Resources", "energy", OIL_MINING + UTILITIES),
+    ("Natural Resources", "oil, gas & mining", OIL_MINING),
+    ("Health, Education", "healthcare", HEALTH),
+    ("Veterans", "healthcare", [(8000, 8099)]),
+    ("Agriculture", "agriculture & food", FARM_FOOD),
+    ("Transportation", "transportation", TRANSPORT),
+    ("Commerce, Science", "transport / telecom / tech", TRANSPORT + TELECOM + TECH),
+    ("Science, Space", "tech & space", TECH + [(3760, 3769)]),
+]
+
 TYPE_WORD = {"P": "Bought", "S": "Sold", "S (partial)": "Sold part", "E": "Exchanged"}
 
 
@@ -331,15 +362,58 @@ def merge_same(trades):
     return out
 
 
+def load_sic(state, tickers):
+    """Fill state['sic'] = {ticker: [sic, description]} for tickers we haven't looked up yet."""
+    cache = state.setdefault("sic", {})
+    todo = [t for t in tickers if t not in cache]
+    ua = os.environ.get("SEC_USER_AGENT", "").strip()
+    if not todo or not ua:
+        return cache
+    s = requests.Session()
+    s.headers.update({"User-Agent": ua, "Accept-Encoding": "gzip, deflate"})
+    try:
+        ciks = {row["ticker"].upper(): int(row["cik_str"]) for row in s.get(SEC_TICKERS, timeout=30).json().values()}
+    except Exception as e:
+        log(f"SEC ticker list unavailable: {e}")
+        return cache
+    for t in todo:
+        cik = ciks.get(t) or ciks.get(t.replace(".", "-"))
+        if not cik:
+            cache[t] = [None, ""]
+            continue
+        try:
+            time.sleep(0.15)
+            d = s.get(SEC_SUBMISSIONS.format(cik=cik), timeout=30).json()
+            cache[t] = [int(d.get("sic") or 0) or None, (d.get("sicDescription") or "").strip()]
+        except Exception as e:
+            log(f"  no SIC for {t}: {e}")
+    return cache
+
+
+def committee_match(sic, committees):
+    """(committee name, sector) if this industry is overseen by one of the member's committees."""
+    if not sic or not committees:
+        return None
+    for c in committees:
+        name = re.sub(r"\s*\((Chair|Chairman|Ranking Member)\)$", "", c)
+        for key, sector, ranges in COMMITTEE_SECTORS:
+            if key in name and any(lo <= sic <= hi for lo, hi in ranges):
+                return name, sector
+    return None
+
+
 def pct_text(x):
     v = round(x * 100)
     return "0%" if v == 0 else f"{v:+d}%"
 
 
-def build_embed(filing, label, trades, prices, committees=None):
+def build_embed(filing, label, trades, prices, committees=None, sic=None):
     trades = merge_same(trades)
-    # purchases first, then the biggest amounts
-    trades = sorted(trades, key=lambda t: (t["type"] != "P", -amount_top(t["amount"])))
+    sic = sic or {}
+    for t in trades:
+        t["match"] = committee_match((sic.get(t["ticker"]) or [None])[0], committees)
+    # committee matches first, then purchases, then the biggest amounts
+    trades = sorted(trades, key=lambda t: (t["match"] is None, t["type"] != "P", -amount_top(t["amount"])))
     n_buy = sum(t.get("count", 1) for t in trades if t["type"] == "P")
     n_sell = sum(t.get("count", 1) for t in trades if t["type"].startswith("S"))
     head = " · ".join(x for x in (f"**{n_buy} buy{'s' if n_buy != 1 else ''}**" if n_buy else "",
@@ -359,9 +433,21 @@ def build_embed(filing, label, trades, prices, committees=None):
         move = since_trade(t["ticker"], t["date"], prices)
         if move is not None:
             line += f" · since then **{pct_text(move)}**"
+        if t["match"]:
+            line += " ⚠️"
         lines.append(line)
     if len(trades) > MAX_LINES:
         lines.append(f"…and {len(trades) - MAX_LINES} more in the filing")
+
+    matches = {}
+    for t in trades:
+        if t["match"]:
+            matches.setdefault(t["match"], []).append(f"${t['ticker']}")
+    note = ""
+    for (comm, sector), tks in matches.items():
+        tks = list(dict.fromkeys(tks))
+        note += (f"\n\n⚠️ **Committee match:** {', '.join(tks[:4])} {'is' if len(tks) == 1 else 'are'} "
+                 f"in **{sector}**, an area the **{comm}** Committee oversees.")
 
     dated = [t["date"] for t in trades if t["date"]]
     delay = ""
@@ -371,12 +457,12 @@ def build_embed(filing, label, trades, prices, committees=None):
         if days > 45:
             delay += " That's past the 45-day legal deadline."
     return {
-        "title": f"🏛️ {label} · {filing['chamber']}",
+        "title": f"🏛️ {label} · {filing['chamber']}" + (" · ⚠️ Committee match" if matches else ""),
         "url": filing["url"],
-        "description": ("\n".join(lines) + delay
+        "description": ("\n".join(lines) + note + delay
                         + "\n\nCongress only reports amount ranges, not exact sums."
                         + f"\n\n📄 [View the official filing]({filing['url']})"),
-        "color": 0x3498DB if buys else 0x95A5A6,
+        "color": 0xE67E22 if matches else 0x3498DB if buys else 0x95A5A6,
         "footer": {"text": "📡 Insider Radar · Source: STOCK Act disclosures · Not financial advice"},
     }
 
@@ -464,7 +550,8 @@ def run():
             state["seen"].append(f["id"])
             continue
         else:
-            embed = build_embed(f, label, trades, prices, comms.get(member_id(legis, f["last"], f["state"])))
+            sic = load_sic(state, {t["ticker"] for t in trades})
+            embed = build_embed(f, label, trades, prices, comms.get(member_id(legis, f["last"], f["state"])), sic)
             for t in trades:
                 state["trades"].append({"who": label, "ticker": t["ticker"], "type": t["type"],
                                         "date": t["date"].isoformat() if t["date"] else None,
