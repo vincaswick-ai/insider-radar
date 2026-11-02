@@ -1,0 +1,27 @@
+name: Video candidates
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Look at buys from the last N days"
+        default: "21"
+      min_value:
+        description: "Minimum buy size in USD"
+        default: "100000"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python candidates.py
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          DAYS: ${{ inputs.days }}
+          MIN_VALUE: ${{ inputs.min_value }}
