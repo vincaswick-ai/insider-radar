@@ -48,6 +48,7 @@ MAX_POSTS = 12               # safety cap per run
 BOOTSTRAP_POSTS = 3
 MAX_LINES = 10               # trades listed per alert
 DEBUG = os.environ.get("POL_DEBUG") == "1"
+SCAN_DAYS = int(os.environ.get("POL_SCAN_DAYS") or 0)   # >0: list committee matches, post nothing
 
 SEC_TICKERS = "https://www.sec.gov/files/company_tickers.json"
 SEC_SUBMISSIONS = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
@@ -493,7 +494,53 @@ def post(webhook, embed):
 
 # ---------------------------------------------------------------- main
 
+def scan():
+    """Print every committee match of the last SCAN_DAYS days, biggest first. Posts nothing."""
+    session = requests.Session()
+    session.headers.update({"User-Agent": UA})
+    legis = load_legislators(session)
+    comms = load_committees(session)
+    since = date.today() - timedelta(days=SCAN_DAYS)
+    filings = house_filings(session, since)
+    log(f"Scanning {len(filings)} House filings since {since}")
+    state, rows, all_trades = {"sic": {}}, [], []
+    for f in filings:
+        try:
+            trades = house_trades(session, f)
+        except Exception as e:
+            log(f"  skip {f['url']}: {e}")
+            continue
+        if not trades:
+            continue
+        label = who(legis, f["first"], f["last"], f["state"])
+        mc = comms.get(member_id(legis, f["last"], f["state"]))
+        for t in trades:
+            all_trades.append((label, mc, f, t))
+    load_sic(state, {t["ticker"] for _, _, _, t in all_trades})
+    for label, mc, f, t in all_trades:
+        m = committee_match((state["sic"].get(t["ticker"]) or [None])[0], mc)
+        if m:
+            rows.append((label, f, t, m))
+    rows.sort(key=lambda r: (r[2]["type"] != "P", -amount_top(r[2]["amount"])))
+    prices = {}
+    log(f"\n===== {len(rows)} committee matches (buys first, biggest first) =====")
+    for label, f, t, (comm, sector) in rows[:60]:
+        move = since_trade(t["ticker"], t["date"], prices)
+        log(f"{TYPE_WORD.get(t['type'], t['type']):10} {t['ticker']:6} {compact_amount(t['amount']):14} "
+            f"trade {t['date']} filed {f['filed']} | {label} | {comm} ({sector}) | "
+            f"since {pct_text(move) if move is not None else '?'} | {f['url']}")
+    big = sorted(all_trades, key=lambda r: (r[3]["type"] != "P", -amount_top(r[3]["amount"])))[:25]
+    log(f"\n===== biggest trades overall (any committee) =====")
+    for label, mc, f, t in big:
+        move = since_trade(t["ticker"], t["date"], prices)
+        log(f"{TYPE_WORD.get(t['type'], t['type']):10} {t['ticker']:6} {compact_amount(t['amount']):14} "
+            f"trade {t['date']} | {label} | {', '.join((mc or [])[:2])} | "
+            f"since {pct_text(move) if move is not None else '?'} | {f['url']}")
+
+
 def run():
+    if SCAN_DAYS:
+        return scan()
     webhook = os.environ.get("WEBHOOK_POLITICIANS", "").strip()
     if not webhook and not DEBUG:
         sys.exit("WEBHOOK_POLITICIANS is not set.")
