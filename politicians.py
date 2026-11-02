@@ -39,6 +39,8 @@ SENATE_SEARCH = "https://efdsearch.senate.gov/search/"
 SENATE_DATA = "https://efdsearch.senate.gov/search/report/data/"
 SENATE_BASE = "https://efdsearch.senate.gov"
 LEGISLATORS = "https://unitedstates.github.io/congress-legislators/legislators-current.json"
+COMMITTEES = "https://unitedstates.github.io/congress-legislators/committees-current.json"
+MEMBERSHIP = "https://unitedstates.github.io/congress-legislators/committee-membership-current.json"
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
 LOOKBACK_DAYS = 10           # look at filings from the last N days each run
@@ -87,18 +89,50 @@ def load_legislators(session):
             last = name["last"].lower()
             party = {"Democrat": "D", "Republican": "R"}.get(term.get("party"), "I")
             full = name.get("official_full") or f"{name['first']} {name['last']}"
-            out[(last, term["state"])] = (full, party, term["type"])
-            out.setdefault((last, None), (full, party, term["type"]))
+            bio = p.get("id", {}).get("bioguide")
+            out[(last, term["state"])] = (full, party, term["type"], bio)
+            out.setdefault((last, None), (full, party, term["type"], bio))
     except Exception as e:
         log(f"legislator list unavailable: {e}")
     return out
+
+
+def load_committees(session):
+    """{bioguide id: ['Armed Services', ...]} - full committees only, chairs/ranking members first."""
+    out = {}
+    try:
+        names = {}
+        for c in session.get(COMMITTEES, timeout=30).json():
+            n = c.get("name", "")
+            for prefix in ("House Committee on the ", "House Committee on ", "Senate Committee on the ",
+                           "Senate Committee on ", "Committee on the ", "Committee on ", "House ", "Senate "):
+                if n.startswith(prefix):
+                    n = n[len(prefix):]
+                    break
+            names[c.get("thomas_id")] = n
+        for cid, members in session.get(MEMBERSHIP, timeout=30).json().items():
+            if len(cid) != 4 or cid not in names:          # skip subcommittees like HSAS28
+                continue
+            for m in members:
+                title = m.get("title") or ""
+                label = names[cid] + (f" ({title})" if title in ("Chair", "Chairman", "Ranking Member") else "")
+                out.setdefault(m.get("bioguide"), []).append((0 if title else 1, label))
+        out = {k: [x[1] for x in sorted(v)] for k, v in out.items()}
+    except Exception as e:
+        log(f"committee list unavailable: {e}")
+    return out
+
+
+def member_id(legis, last, state):
+    hit = legis.get((last.lower(), state)) or legis.get((last.lower(), None))
+    return hit[3] if hit else None
 
 
 def who(legis, first, last, state):
     """'Nancy Pelosi (D-CA)' style label."""
     hit = legis.get((last.lower(), state)) or legis.get((last.lower(), None))
     if hit:
-        full, party, _ = hit
+        full, party = hit[0], hit[1]
         return f"{full} ({party}-{state})" if state else f"{full} ({party})"
     return f"{first} {last}".strip() + (f" ({state})" if state else "")
 
@@ -281,24 +315,50 @@ def amount_top(text):
     return max(nums) if nums else 0
 
 
-def build_embed(filing, label, trades, prices):
+def merge_same(trades):
+    """Same stock, same side, same day (often several accounts) -> one line with a count."""
+    out, index = [], {}
+    for t in trades:
+        key = (t["ticker"], t["type"], t["date"], t["option"])
+        if key in index:
+            first = out[index[key]]
+            first["count"] = first.get("count", 1) + 1
+            if amount_top(t["amount"]) > amount_top(first["amount"]):
+                first["amount"] = t["amount"]
+        else:
+            index[key] = len(out)
+            out.append(dict(t))
+    return out
+
+
+def pct_text(x):
+    v = round(x * 100)
+    return "0%" if v == 0 else f"{v:+d}%"
+
+
+def build_embed(filing, label, trades, prices, committees=None):
+    trades = merge_same(trades)
     # purchases first, then the biggest amounts
     trades = sorted(trades, key=lambda t: (t["type"] != "P", -amount_top(t["amount"])))
-    n_buy = sum(t["type"] == "P" for t in trades)
-    n_sell = sum(t["type"].startswith("S") for t in trades)
+    n_buy = sum(t.get("count", 1) for t in trades if t["type"] == "P")
+    n_sell = sum(t.get("count", 1) for t in trades if t["type"].startswith("S"))
     head = " · ".join(x for x in (f"**{n_buy} buy{'s' if n_buy != 1 else ''}**" if n_buy else "",
                                   f"**{n_sell} sale{'s' if n_sell != 1 else ''}**" if n_sell else "") if x)
-    lines, buys = ([head, ""] if head else []), 0
+    lines, buys = ([head] if head else []), 0
+    if committees:
+        lines.append("🪑 Committees: " + ", ".join(committees[:3]))
+    if lines:
+        lines.append("")
     for t in trades[:MAX_LINES]:
         word = TYPE_WORD.get(t["type"], t["type"])
         icon = "🟢" if t["type"] == "P" else "🔴" if t["type"].startswith("S") else "⚪"
         buys += t["type"] == "P"
-        line = f"{icon} **{word} ${t['ticker']}**{' (options)' if t['option'] else ''} · {compact_amount(t['amount'])}"
+        line = f"{icon} **{word} ${t['ticker']}**{' (options)' if t['option'] else ''}{f' ×{t["count"]}' if t.get('count') else ''} · {compact_amount(t['amount'])}"
         if t["date"]:
             line += f" · {t['date']:%b %d}"
         move = since_trade(t["ticker"], t["date"], prices)
         if move is not None:
-            line += f" · since then **{move * 100:+.0f}%**"
+            line += f" · since then **{pct_text(move)}**"
         lines.append(line)
     if len(trades) > MAX_LINES:
         lines.append(f"…and {len(trades) - MAX_LINES} more in the filing")
@@ -360,6 +420,7 @@ def run():
     session = requests.Session()
     session.headers.update({"User-Agent": UA})
     legis = load_legislators(session)
+    comms = load_committees(session)
 
     sources = []
     try:
@@ -382,7 +443,7 @@ def run():
         new = new[-BOOTSTRAP_POSTS:]
         log("First run: posting only the newest few.")
     if DEBUG:
-        new = new[-6:]
+        new = sources[-6:]          # debug: show the newest filings even if already posted
 
     prices, posted = {}, 0
     for f, src in new:
@@ -403,7 +464,7 @@ def run():
             state["seen"].append(f["id"])
             continue
         else:
-            embed = build_embed(f, label, trades, prices)
+            embed = build_embed(f, label, trades, prices, comms.get(member_id(legis, f["last"], f["state"])))
             for t in trades:
                 state["trades"].append({"who": label, "ticker": t["ticker"], "type": t["type"],
                                         "date": t["date"].isoformat() if t["date"] else None,
