@@ -1,0 +1,53 @@
+name: Portfolio and weekly recap
+
+on:
+  schedule:
+    # every weekday after the US close (21:40 UTC); on Fridays it also posts the weekly recap
+    - cron: "40 21 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      recap:
+        description: "Post the weekly recap now"
+        type: boolean
+        default: true
+      target:
+        description: "Where to post the recap"
+        type: choice
+        options: [test, public]
+        default: test
+
+permissions:
+  contents: write
+
+concurrency:
+  group: portfolio
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Update portfolio (and post recap on Fridays)
+        env:
+          WEBHOOK_RECAP: ${{ secrets.WEBHOOK_RECAP }}
+          WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
+          RECAP: ${{ inputs.recap && '1' || '0' }}
+          TARGET: ${{ inputs.target || 'public' }}
+        run: python portfolio.py
+      - name: Save portfolio
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain portfolio.json)" ]; then
+            git config user.name "insider-radar-bot"
+            git config user.email "insider-radar-bot@users.noreply.github.com"
+            git add portfolio.json
+            git commit -m "Update portfolio [skip ci]"
+            git pull --rebase --autostash || true
+            git push
+          fi
