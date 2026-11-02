@@ -1,0 +1,115 @@
+{
+ "seen": [
+  "H20035714",
+  "H20035525",
+  "H9116389",
+  "H9116390",
+  "H9116391",
+  "H20035715",
+  "H20035563",
+  "H20035689",
+  "H20035710",
+  "H20035727"
+ ],
+ "trades": [
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "ASML",
+   "type": "S (partial)",
+   "date": "2026-10-23",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-10-28",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035710.pdf"
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "STX",
+   "type": "S (partial)",
+   "date": "2026-10-23",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-10-28",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035710.pdf"
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "TXN",
+   "type": "S (partial)",
+   "date": "2026-10-14",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-10-28",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035710.pdf"
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "T",
+   "type": "P",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-29",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035727.pdf"
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "LRCX",
+   "type": "P",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-29",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035727.pdf"
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "MPC",
+   "type": "S",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-29",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035727.pdf"
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "MPC",
+   "type": "S",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-29",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035727.pdf"
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "PLD",
+   "type": "P",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-29",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035727.pdf"
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "PLD",
+   "type": "P",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-29",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035727.pdf"
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "RPM",
+   "type": "P",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-29",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035727.pdf"
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "V",
+   "type": "S",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-10-29",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035727.pdf"
+  }
+ ]
+}
