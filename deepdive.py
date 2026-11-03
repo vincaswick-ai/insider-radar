@@ -356,7 +356,8 @@ def catalysts(session, buy, issuer_cik, subs, sector, today):
     lines = []
     e = earnings_date(buy["ticker"])
     if e and e >= today:
-        lines.append(f"**Earnings in {(e - today).days} days** ({e:%b %d}).")
+        n = (e - today).days
+        lines.append(f"**Earnings {'today' if n == 0 else 'tomorrow' if n == 1 else f'in {n} days'}** ({e:%b %d}).")
     sic = int(subs.get("sic") or 0)
     if 2833 <= sic <= 2836 or 3841 <= sic <= 3851 or sic == 8731:
         p = pdufa_date(session, issuer_cik, subs, today)
@@ -448,7 +449,7 @@ def contracts(company, today):
 
 # ---------------------------------------------------------------- 🧭 sector
 
-def sector_check(rows, sector):
+def sector_check(rows, sector, who="The insider"):
     if not sector or not rows or len(rows) < 25:
         return []
     try:
@@ -462,9 +463,9 @@ def sector_check(rows, sector):
         sec = etf[-1][4] / close_on(etf, month_ago) - 1
         line += f", its sector ({sector['name']}, {sector['etf']}) **{pct(sec)}**."
         if stock < -0.05 and stock < sec - 0.05:
-            line += " The insider bought while the stock lagged its own sector: a **contrarian** buy."
+            line += f" {who} bought while the stock lagged its own sector: a **contrarian** buy."
         elif sec < -0.03:
-            line += " The insider bought while the **whole sector was falling**."
+            line += f" {who} bought while the **whole sector was falling**."
         return [line]
     return [line + "."]
 
@@ -598,7 +599,7 @@ def build_politician(session, trade, who, filing_url, committees=None):
     add("🧠 WHY IT STANDS OUT", why)
     add("📅 CATALYSTS", lambda: catalysts(session, fake_buy, cik, subs, sector, today) if cik else [])
     add("🏛️ WASHINGTON", lambda: lobbying(company, today) + contracts(company, today))
-    add("🧭 SECTOR", lambda: sector_check(rows, sector))
+    add("🧭 SECTOR", lambda: sector_check(rows, sector, "They"))
     add("📰 LATEST COMPANY NEWS (SEC 8-K)", lambda: news(subs, today))
     desc = (f"**{who}** bought **{trade['amount']}** of **{company}** (${ticker}).\n\n"
             + ("\n\n".join(sections) if sections else "_No extra facts found for this one._")
