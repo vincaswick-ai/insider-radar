@@ -110,6 +110,7 @@ def what_it_does(y, subs):
         first = sentences(summary)[0]
         first = re.sub(r",? together with its subsidiaries,?", "", first)
         first = re.sub(r",? through its subsidiaries,?", "", first)
+        first = re.sub(r",? (in|across) the United States,.*$", ".", first)
         if len(first) > 230:
             first = first[:227].rsplit(" ", 1)[0] + "…"
         return first
@@ -283,7 +284,9 @@ def results_facts(pr):
     if not pr:
         return [], []
     url, filed, text = pr
-    sents = [s.strip() for s in sentences(text[:60000]) if 40 < len(s) < 320 and re.search(r"\$|\d%", s)]
+    clean = text[:80000].replace("•", ". ")
+    sents = [s.strip() for s in sentences(clean[:60000]) if 40 < len(s) < 320 and re.search(r"\$|\d%", s)
+             and "expected to close" not in s]
     picks, deals = [], []
     for s in sents:
         low = s.lower()
@@ -292,9 +295,10 @@ def results_facts(pr):
         elif re.search(r"\b(outlook|guidance|expects?|anticipates?)\b", low) and "forward-looking" not in low \
                 and len([p for p in picks if p]) < 3 and s not in picks:
             picks.append(s)
-    for s in sentences(text[:80000]):
-        if re.search(r"expected to (close|be completed)", s, re.I) and 30 < len(s) < 300:
-            deals.append(s.strip())
+    for s in sentences(text[:80000].replace("•", ". ")):
+        m = re.search(r"expected to (?:close|be completed) (?:during|in|by) (the [a-z]+ quarter of 20\d\d|[A-Z][a-z]+ 20\d\d|20\d\d)", s)
+        if m and m.group(1) not in [d for d in deals]:
+            deals.append(m.group(1))
     return picks[:3], deals[:2]
 
 
@@ -355,15 +359,41 @@ def future_dates(text, today):
     return sorted(set(out))
 
 
+KEY_DATE_WORDS = r"(effective|take effect|takes effect|beginning|begins|no later than|prohibit|compliance date|deadline)"
+
+
+def key_date(doc, today):
+    """A future date the rule itself names as effective / compliance / prohibition date."""
+    if doc.get("effective_on") and doc["effective_on"] > today.isoformat():
+        return date.fromisoformat(doc["effective_on"])
+    texts = [doc.get("abstract") or ""]
+    if doc.get("raw_text_url"):
+        try:
+            texts.append(requests.get(doc["raw_text_url"], timeout=25).text[:400000])
+        except Exception:
+            pass
+    found = []
+    for text in texts:
+        text = re.sub(r"\s+", " ", text)
+        for m in re.finditer(KEY_DATE_WORDS, text, re.I):
+            window = text[max(0, m.start() - 160): m.end() + 160]
+            found += future_dates(window, today)
+        if found:
+            break
+    return min(found) if found else None
+
+
 def federal_rules(subs, company, today):
-    """[(line, date or None)] new rules / proposed rules in the last 9 months for the industry or company."""
+    """[(line, key date or None)] new rules / proposed rules (last 9 months) about the industry or company."""
     out, seen = [], set()
-    for term in [f'"{t}"' for t in industry_terms(subs)] + [f'"{company}"']:
-        params = [("conditions[term]", term), ("conditions[type][]", "RULE"), ("conditions[type][]", "PRORULE"),
+    queries = [(t, "title") for t in industry_terms(subs)] + [(company, "any")]
+    for term, where in queries:
+        params = [("conditions[term]", f'"{term}"'), ("conditions[type][]", "RULE"),
+                  ("conditions[type][]", "PRORULE"),
                   ("conditions[publication_date][gte]", (today - timedelta(days=270)).isoformat()),
                   ("per_page", "20"), ("order", "relevance")]
-        for f in ("title", "publication_date", "effective_on", "comments_close_on", "html_url", "abstract",
-                  "agencies", "type"):
+        for f in ("title", "publication_date", "effective_on", "html_url", "abstract", "agencies", "type",
+                  "raw_text_url"):
             params.append(("fields[]", f))
         try:
             r = requests.get(FR_URL, params=params, timeout=25)
@@ -373,18 +403,19 @@ def federal_rules(subs, company, today):
             log(f"  Federal Register unavailable: {e}")
             continue
         for d in docs:
+            title = d.get("title") or ""
             if d["html_url"] in seen:
+                continue
+            # industry terms must be what the rule is ABOUT (in the title), not a word in the fine print
+            if where == "title" and term.lower() not in title.lower():
+                continue
+            if where == "any" and term.lower() not in (title + " " + (d.get("abstract") or "")).lower():
                 continue
             seen.add(d["html_url"])
             agency = ((d.get("agencies") or [{}])[0].get("name") or "").replace("Department", "Dept.")
-            when = None
-            if d.get("effective_on") and d["effective_on"] > today.isoformat():
-                when = date.fromisoformat(d["effective_on"])
-            else:
-                fut = future_dates(d.get("abstract"), today)
-                when = fut[0] if fut else None
+            when = key_date(d, today)
             kind = "Final rule" if d.get("type") == "Rule" else "Proposed rule"
-            line = f"[{d['title'][:110]}]({d['html_url']}) · {kind}, {agency or 'federal agency'}, " \
+            line = f"[{title[:110]}]({d['html_url']}) · {kind}, {agency or 'federal agency'}, " \
                    f"published {d['publication_date']}"
             if when:
                 line += f" · **key date {when:%b %d, %Y}**"
@@ -395,6 +426,12 @@ def federal_rules(subs, company, today):
 
 
 # ---------------------------------------------------------------- 👤 insiders
+
+def sold_total(y):
+    cutoff = time.time() - 365 * 86400
+    return sum(raw(t, "value") or 0 for t in (raw(y, "insiderTransactions", "transactions") or [])
+               if (t.get("transactionText") or "").lower().startswith("sale") and (raw(t, "startDate") or 0) >= cutoff)
+
 
 def insider_sales(y, buyer_name):
     rows = raw(y, "insiderTransactions", "transactions") or []
@@ -456,8 +493,10 @@ def thesis(buy, kind, move, val, rules, results, rank, cluster):
     return base, tl
 
 
-def risks(buy, y, val, kind, rows):
+def risks(buy, y, val, kind, rows, sold=0.0):
     out = []
+    if sold and sold >= 10 * buy["value"]:
+        out.append(f"Insiders sold **{money(sold)}** over the last year, far more than this {money(buy['value'])} buy.")
     fd = (y or {}).get("financialData") or {}
     debt, ebitda = raw(fd, "totalDebt"), raw(fd, "ebitda")
     if debt and ebitda and ebitda > 0 and debt / ebitda >= 2.5:
@@ -530,7 +569,8 @@ def build(session, buy, rows, filing_url=None, in_cluster=False):
     sales = safe("insider sales", lambda: insider_sales(y, buy["owner"]["name"]), [])
     cats = safe("catalysts", lambda: dd.catalysts(session, buy, issuer, subs, dd.sector_of(int(subs.get("sic") or 0)),
                                                    today), [])
-    cats += [f"Deal pending: {d[:200]}" for d in deals]
+    if deals:
+        cats.append(f"Pending acquisition(s) expected to close in {deals[0]} (company's earnings release).")
     cats += [f"Rule key date **{w:%b %d, %Y}**" for _, w in rules if w]
 
     guess, tldr = thesis(buy, kind, move, val, rules, res, rank, in_cluster)
@@ -569,7 +609,7 @@ def build(session, buy, rows, filing_url=None, in_cluster=False):
         parts.append("**👤 THE INSIDER**\n" + bullets(skin + record[1:] + sales))
     if cats:
         parts.append("**📅 DATES TO WATCH**\n" + bullets(cats[:5]))
-    parts.append("**⚠️ RISKS**\n" + bullets(risks(buy, y, val, kind, rows)))
+    parts.append("**⚠️ RISKS**\n" + bullets(risks(buy, y, val, kind, rows, sold_total(y))))
     parts.append("**❌ THESIS BREAKS IF**\n" + bullets(breaks_if(rows, cats)))
     src = ["SEC filings"] + (["Federal Register"] if rules else []) + (["Senate LDA / USAspending"] if wash else []) \
         + (["Yahoo Finance"] if y else [])
