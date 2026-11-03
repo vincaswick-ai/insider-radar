@@ -1,0 +1,17 @@
+[
+ {
+  "id": 1,
+  "posted": "2026-11-03T23:39+00:00",
+  "ticker": "BBTX",
+  "company": "Bambusa Therapeutics, Inc.",
+  "insider": "Ra Capital Management L.P.",
+  "role": "Director, 10% Owner",
+  "kind": "cluster",
+  "score": 6,
+  "value": 46639957,
+  "insider_price": 15.7897,
+  "signal_price": 16.0,
+  "url": "https://www.sec.gov/Archives/edgar/data/1315082/000123191926001533/xslF345X06/form4-11032026_111149.xml",
+  "source": "live"
+ }
+]
