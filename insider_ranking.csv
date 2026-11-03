@@ -135,7 +135,7 @@ owner_cik,name,last_ticker,role,results,avg_excess_6m,win_rate,last_buy
 0001518594,Deno David J.,BLMN,CEO/CFO/President/Chair,3,0.281,1.0,2020-07-06
 0001327026,EDELSON DAVID B,AN,Director,3,0.2806,1.0,2019-02-27
 0001313756,"Owl Creek Asset Management, L.P.",PYYX,10% owner / other,4,0.2805,1.0,2024-08-22
-0001275818,SHELTON PAUL G,MEI,Director,3,0.2777,1.0,2014-03-18
+0001275818,SHELTON PAUL G,MEI,Director,3,0.2776,1.0,2014-03-18
 0001244525,RUSSELL JOSEPH V,CXW,Director,3,0.2776,1.0,2015-12-10
 0001447591,Brooks Jayme L.,LMB,CEO/CFO/President/Chair,3,0.2769,1.0,2024-05-22
 0001587724,Herrick Glen William,CASH,CEO/CFO/President/Chair,3,0.276,1.0,2023-03-16
@@ -305,7 +305,7 @@ owner_cik,name,last_ticker,role,results,avg_excess_6m,win_rate,last_buy
 0000938885,ROGERS JOHN W JR,NKE,Director,8,0.1406,1.0,2024-12-30
 0001318504,Carroll Michael A,BRX,CEO/CFO/President/Chair,3,0.1381,1.0,2015-07-16
 0001298066,Burgess Frank E,MCN,Other officer,5,0.1379,1.0,2008-11-25
-0001189383,FULMER L CRAIG,LKFN,Director,5,0.1376,1.0,2009-11-16
+0001189383,FULMER L CRAIG,LKFN,Director,5,0.1377,1.0,2009-11-16
 0001672424,Mendillo Jane L,GM,Director,4,0.1375,1.0,2017-08-22
 0001496892,Olson Mark K,FMCB,Other officer,3,0.1372,1.0,2022-03-25
 0001183480,MONSER EDWARD L,APD,Director,3,0.137,1.0,2021-11-09
@@ -400,8 +400,8 @@ owner_cik,name,last_ticker,role,results,avg_excess_6m,win_rate,last_buy
 0001999142,Graci Angelo D,FPF,10% owner / other,3,0.0811,1.0,2024-04-05
 0001280088,PELLEGRINI AUGUST JR,BCBP,Director,3,0.0799,1.0,2019-02-26
 0001332249,Miller Donald A,PDM,CEO/CFO/President/Chair,3,0.0784,1.0,2015-09-02
-0001171077,SHIFFMAN GARY A,SUI,CEO/CFO/President/Chair,3,0.0783,1.0,2021-11-02
 0001403675,Goldman Steven Jay,SGU,CEO/CFO/President/Chair,3,0.0782,1.0,2018-08-15
+0001171077,SHIFFMAN GARY A,SUI,CEO/CFO/President/Chair,3,0.0782,1.0,2021-11-02
 0001222671,MOHAPATRA SURYA N,LDOS,Director,3,0.0781,1.0,2016-11-14
 0000938543,HERSHEY TRUST CO TRUSTEE IN TRUST FOR MILTON HERSHEY SCHOOL,HSY,10% owner / other,3,0.0781,1.0,2018-10-30
 0000908551,HERSHEY TRUST CO,HSY,10% owner / other,3,0.0781,1.0,2018-10-30
@@ -1577,7 +1577,7 @@ owner_cik,name,last_ticker,role,results,avg_excess_6m,win_rate,last_buy
 0001281344,PHAIR JOHN T,SRCE,Director,3,0.104,0.667,2009-10-28
 0001899288,Simmes Matthew J,IESC,Other officer,3,0.1039,0.667,2022-08-11
 0001217273,FRIST ROBERT A JR,HSTM,CEO/CFO/President/Chair,3,0.103,0.667,2021-05-04
-0001329071,Loughlin Christopher,TZOO,Other officer,3,0.102,0.667,2009-11-10
+0001329071,Loughlin Christopher,TZOO,Other officer,3,0.1021,0.667,2009-11-10
 0001464694,Blackstone Holdings I L.P.,PACK,10% owner / other,3,0.102,0.667,2021-04-05
 0001182496,YAZDI MAHVASH,NWE,Director,3,0.102,0.667,2024-02-21
 0001070785,PARDO JAIME CHICO /FA,HON,Director,3,0.1019,0.667,2011-08-26
@@ -4196,7 +4196,7 @@ owner_cik,name,last_ticker,role,results,avg_excess_6m,win_rate,last_buy
 0001248295,SLOVIN BRUCE,SIGA,Director,6,0.059,0.333,2011-09-27
 0001907431,Wolf Alexander,APPF,Director,3,0.0589,0.333,2025-02-18
 0001633114,Hackman Gregory V.,BOOT,CEO/CFO/President/Chair,3,0.0587,0.333,2016-05-24
-0001625756,MASCARENAS PAUL ANTHONY,BWA,Director,3,0.0581,0.333,2018-11-01
+0001625756,MASCARENAS PAUL ANTHONY,BWA,Director,3,0.0582,0.333,2018-11-01
 0001182537,JOERRES JEFFREY A,WU,Director,3,0.0563,0.333,2022-11-09
 0001888729,Germain Jean-Marc,EAF,Director,3,0.0561,0.333,2025-05-12
 0001521271,Sneeringer Eugene M. Jr,CHMG,Director,3,0.056,0.333,2014-10-30
@@ -4319,7 +4319,7 @@ owner_cik,name,last_ticker,role,results,avg_excess_6m,win_rate,last_buy
 0001518052,Klein Martin P,GNW,CEO/CFO/President/Chair,3,0.0078,0.333,2015-08-10
 0001180726,RIBEIRO CARL,INDB,Director,3,0.0069,0.333,2010-05-07
 0001273693,Control Empresarial de Capitales S.A. de C.V.,PBF,10% owner / other,30,0.0069,0.333,2025-06-09
-0001454029,Fitzpatrick Edward J.,G,CEO/CFO/President/Chair,3,0.0068,0.333,2020-05-19
+0001454029,Fitzpatrick Edward J.,G,CEO/CFO/President/Chair,3,0.0067,0.333,2020-05-19
 0001387196,Pettie Mark,PBH,CEO/CFO/President/Chair,3,0.0066,0.333,2007-11-26
 0001513841,Snow Lester A,CWT,Director,3,0.006,0.333,2013-03-06
 0001641475,Van Horn R. Lawrence,CHCT,Director,3,0.0054,0.333,2025-05-30
@@ -5313,7 +5313,7 @@ owner_cik,name,last_ticker,role,results,avg_excess_6m,win_rate,last_buy
 0001717060,Gottron Joseph A. II,BOKF,Other officer,4,0.0112,0.25,2020-05-14
 0001772375,Taketa Richard H,PLMR,Director,4,0.011,0.25,2025-08-19
 0001577345,Peterson Michael Lawrence,QCRH,Director,4,0.0097,0.25,2018-12-13
-0001640225,Grabowsky Louis J.,GFF,Director,4,0.0078,0.25,2021-12-21
+0001640225,Grabowsky Louis J.,GFF,Director,4,0.0079,0.25,2021-12-21
 0001617692,Tramontano Paul E.,ECC,Director,4,0.0076,0.25,2020-04-17
 0001159187,UBBEN JEFFREY W,XOM,Director,4,0.0063,0.25,2023-11-08
 0001259869,BIOTECH GROWTH N V,BDTX,10% owner / other,4,0.0031,0.25,2023-10-19
@@ -5721,7 +5721,7 @@ owner_cik,name,last_ticker,role,results,avg_excess_6m,win_rate,last_buy
 0001327346,Walicek Bruce A,PXLW,CEO/CFO/President/Chair,5,0.0021,0.2,2011-05-11
 0001913264,Louie Ngar Yee,MAIA,Director,5,-0.0079,0.2,2025-12-23
 0001920248,"American Realty Capital III, LLC",NYC,10% owner / other,5,-0.0084,0.2,2026-01-07
-0001729835,Gibney Dennis E.,CLBK,CEO/CFO/President/Chair,5,-0.0092,0.2,2023-03-14
+0001729835,Gibney Dennis E.,CLBK,CEO/CFO/President/Chair,5,-0.0093,0.2,2023-03-14
 0001959299,Rotem-Wildeman Karin,KDP,Other officer,5,-0.0108,0.2,2024-03-11
 0001953760,Meli Ali,MONIX,CEO/CFO/President/Chair,5,-0.0121,0.2,2026-01-02
 0001486072,Churchill Dwight D.,AMG,Director,5,-0.0143,0.2,2021-08-02
@@ -6245,7 +6245,7 @@ owner_cik,name,last_ticker,role,results,avg_excess_6m,win_rate,last_buy
 0001186796,PARKS MICHAEL K,ARCC,Director,3,-0.1505,0.0,2020-09-11
 0001959953,Korch Angela A,MTN,CEO/CFO/President/Chair,6,-0.1508,0.0,2026-03-16
 0001628706,SINGER JULIAN D.,CCUR,10% owner / other,6,-0.1514,0.0,2018-05-15
-0001103130,DECARO ANGELO,PNBK,CEO/CFO/President/Chair,4,-0.1524,0.0,2007-11-13
+0001103130,DECARO ANGELO,PNBK,CEO/CFO/President/Chair,4,-0.1525,0.0,2007-11-13
 0001232984,ROY J STEVEN,ONEW,Director,3,-0.1525,0.0,2025-05-09
 0001316274,LERNER RICHARD A,OPK,Director,4,-0.1526,0.0,2017-06-06
 0001018428,BRADLEY MICHAEL J,TBBK,Director,4,-0.1526,0.0,2016-11-14
@@ -6464,7 +6464,7 @@ owner_cik,name,last_ticker,role,results,avg_excess_6m,win_rate,last_buy
 0001346370,Trinad Capital Master Fund Ltd.,ISHM,10% owner / other,3,-0.2904,0.0,2007-10-25
 0001250817,COHEN GLENN GARY,PDM,Director,4,-0.2914,0.0,2022-08-04
 0001555130,Rasmus Robert E.,ARQ,CEO/CFO/President/Chair,3,-0.2916,0.0,2025-11-12
-0001010178,TISCH JAMES S,GE,Director,3,-0.2922,0.0,2017-11-22
+0001010178,TISCH JAMES S,GE,Director,3,-0.2923,0.0,2017-11-22
 0001566418,SCHWARTZ HARVEY M,SOFI,Director,3,-0.2926,0.0,2022-06-13
 0001753143,Pardo Geoffrey B,SGP,Director,3,-0.2927,0.0,2026-02-11
 0001827382,Nisar Nadeem,OPAL,Director,4,-0.2928,0.0,2025-06-16
@@ -6582,7 +6582,7 @@ owner_cik,name,last_ticker,role,results,avg_excess_6m,win_rate,last_buy
 0001513990,Wagner Leon,LSCG,Director,3,-0.3991,0.0,2011-08-22
 0001461299,KAPLAN GREGG A.,ENVA,Director,3,-0.3993,0.0,2015-08-27
 0001191615,CREATURO CRAIG A,UFI,CEO/CFO/President/Chair,4,-0.4018,0.0,2023-02-14
-0001433612,Asai Mitsuo,ATEC,CEO/CFO/President/Chair,3,-0.4027,0.0,2015-05-19
+0001433612,Asai Mitsuo,ATEC,CEO/CFO/President/Chair,3,-0.4028,0.0,2015-05-19
 0001834436,Sullivan James David,BKYI,Other officer,3,-0.4044,0.0,2023-11-01
 0001963344,Campbell-Breeden Richard,ARQ,Director,3,-0.4058,0.0,2026-03-24
 0001779818,Martin James Rudolph,PETV,Director,4,-0.4071,0.0,2023-08-23
