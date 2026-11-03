@@ -43,6 +43,8 @@ jobs:
           POL_TEST_POST: ${{ inputs.test_post || '' }}
           POL_LOOKBACK_DAYS: ${{ inputs.test_post && '30' || '10' }}
           WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
+          WEBHOOK_DEEPDIVE: ${{ secrets.WEBHOOK_DEEPDIVE }}
+          LDA_API_KEY: ${{ secrets.LDA_API_KEY }}
         run: python politicians.py
       - name: Save state
         if: always() && (inputs.scan_days == '' || inputs.scan_days == '0' || inputs.scan_days == null)
