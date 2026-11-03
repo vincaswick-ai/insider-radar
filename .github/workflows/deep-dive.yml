@@ -1,0 +1,38 @@
+name: Deep dive
+
+on:
+  workflow_dispatch:
+    inputs:
+      ticker:
+        description: "Ticker, e.g. TTMI (uses its latest insider buy)"
+        required: true
+      name:
+        description: "Optional: only this insider (part of the name, e.g. Wajid)"
+        required: false
+        default: ""
+      target:
+        description: "Where to post"
+        type: choice
+        options: [test, public]
+        default: test
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Build and post the deep dive
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          WEBHOOK_DEEPDIVE: ${{ secrets.WEBHOOK_DEEPDIVE }}
+          WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
+          LDA_API_KEY: ${{ secrets.LDA_API_KEY }}
+          TICKER: ${{ inputs.ticker }}
+          NAME: ${{ inputs.name }}
+          TARGET: ${{ inputs.target }}
+        run: python deepdive.py

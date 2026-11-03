@@ -31,6 +31,8 @@ jobs:
         env:
           WEBHOOK_INSIDER_BUYS: ${{ secrets.WEBHOOK_INSIDER_BUYS }}
           WEBHOOK_CLUSTER: ${{ secrets.WEBHOOK_CLUSTER }}
+          WEBHOOK_DEEPDIVE: ${{ secrets.WEBHOOK_DEEPDIVE }}
+          LDA_API_KEY: ${{ secrets.LDA_API_KEY }}
           SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
           MIN_VALUE: ${{ vars.MIN_VALUE || '50000' }}
         run: python bot.py
