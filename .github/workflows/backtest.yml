@@ -9,6 +9,9 @@ on:
       end_year:
         description: "Last year"
         default: "2026"
+      bench:
+        description: "Benchmark: SPY (S&P 500) or IWM (small companies)"
+        default: "SPY"
 
 permissions:
   contents: write
@@ -29,6 +32,7 @@ jobs:
           WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
           START_YEAR: ${{ inputs.start_year }}
           END_YEAR: ${{ inputs.end_year }}
+          BENCH: ${{ inputs.bench }}
         run: python backtest.py
       - name: Save results
         if: always()
