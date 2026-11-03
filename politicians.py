@@ -541,6 +541,22 @@ def scan():
             f"since {pct_text(move) if move is not None else '?'} | {f['url']}")
 
 
+def deep_dives(webhook, filing, label, trades, committees, limit=2):
+    """Radar Deep Dive for this filing's biggest stock buys ($50K+ or in the member's committee sector)."""
+    try:
+        import deepdive
+        sess = requests.Session()
+        sess.headers.update({"User-Agent": os.environ.get("SEC_USER_AGENT", "").strip(),
+                             "Accept-Encoding": "gzip, deflate"})
+        picks = [t for t in trades if deepdive.pol_wanted(t, amount_top(t["amount"]))]
+        picks.sort(key=lambda t: (not t.get("match"), -amount_top(t["amount"])))
+        for t in picks[:limit]:
+            post(webhook, deepdive.build_politician(sess, t, label, filing["url"], committees))
+            log(f"  deep dive {t['ticker']} for {label}")
+    except Exception as e:
+        log(f"  politician deep dive skipped: {e}")
+
+
 def run():
     if SCAN_DAYS:
         return scan()
@@ -619,6 +635,9 @@ def run():
         else:
             post(webhook, embed)
             log(f"  posted {label} ({len(trades or [])} trades)")
+        deep_hook = (os.environ.get("WEBHOOK_PROOF") if DEBUG and TEST_ID else os.environ.get("WEBHOOK_DEEPDIVE")) or ""
+        if deep_hook.strip() and not bootstrap and trades:
+            deep_dives(deep_hook.strip(), f, label, trades, comms.get(member_id(legis, f["last"], f["state"])))
         state["seen"].append(f["id"])
         posted += 1
 

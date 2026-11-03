@@ -331,8 +331,8 @@ def house_votes(words, today):
     """Bills on the House floor schedule this week whose titles touch the sector."""
     monday = today - timedelta(days=today.weekday())
     stamp = monday.strftime("%Y%m%d")
-    for url in (f"https://docs.house.gov/billsthisweek/{stamp}/{stamp}.xml",
-                f"https://docs.house.gov/floor/Download.aspx?file=/billsthisweek/{stamp}/{stamp}.xml"):
+    for url in (f"https://docs.house.gov/floor/Download.aspx?file=%2Fbillsthisweek%2F{stamp}%2F{stamp}.xml",
+                f"https://docs.house.gov/billsthisweek/{stamp}/{stamp}.xml"):
         try:
             r = requests.get(url, headers=BROWSER, timeout=20)
             if r.status_code != 200 or "<" not in r.text[:50]:
@@ -542,6 +542,73 @@ def build(session, buy, rows, filing_url=None, in_cluster=False):
         "description": desc[:4000],
         "color": 0x9B59B6,
         "footer": {"text": "📡 Insider Radar · public data (SEC, Senate LDA, USAspending, House, FDA) · "
+                           "Not financial advice"},
+    }
+
+
+# ---------------------------------------------------------------- politicians
+
+def pol_wanted(trade, amount_top):
+    """A politician's stock buy worth a deep dive: $50K+ or in their own committee's sector."""
+    return (trade.get("type") == "P" and not trade.get("option")
+            and (amount_top >= 50_001 or trade.get("match")))
+
+
+def build_politician(session, trade, who, filing_url, committees=None):
+    """Deep dive for one politician stock buy. trade: {'ticker','date','amount','match'}."""
+    today = datetime.now(timezone.utc).date()
+    from repost import issuer_cik
+    sections = []
+
+    def add(title, fn):
+        try:
+            lines = fn()
+            if lines:
+                sections.append(f"**{title}**\n" + "\n".join(f"• {x}" for x in lines))
+        except Exception as e:
+            log(f"  politician deep dive '{title}' failed: {e}")
+
+    ticker = trade["ticker"]
+    cik = issuer_cik(session, ticker)
+    subs = submissions(session, cik) if cik else {}
+    company = short_company(subs.get("name") or ticker)
+    sector = sector_of(int(subs.get("sic") or 0))
+    try:
+        rows = fetch_prices(ticker, "1y")[0]
+    except Exception:
+        rows = []
+    fake_buy = {"ticker": ticker, "company": company}
+
+    def why():
+        out = []
+        if trade.get("match"):
+            comm, sec = trade["match"][0], trade["match"][1]
+            out.append(f"⚠️ They sit on the **{comm}** committee, which oversees **{sec}**, and bought a "
+                       f"{sec.lower()} stock.")
+        elif committees:
+            out.append(f"Committees: {', '.join(committees[:3])}.")
+        d = trade.get("date")
+        if rows and d:
+            day = d if isinstance(d, date) else date.fromisoformat(str(d))
+            base = close_on(rows, day)
+            if base:
+                out.append(f"The stock is **{pct(rows[-1][4] / base - 1)}** since their trade on {day:%b %d}.")
+        return out
+
+    add("🧠 WHY IT STANDS OUT", why)
+    add("📅 CATALYSTS", lambda: catalysts(session, fake_buy, cik, subs, sector, today) if cik else [])
+    add("🏛️ WASHINGTON", lambda: lobbying(company, today) + contracts(company, today))
+    add("🧭 SECTOR", lambda: sector_check(rows, sector))
+    add("📰 LATEST COMPANY NEWS (SEC 8-K)", lambda: news(subs, today))
+    desc = (f"**{who}** bought **{trade['amount']}** of **{company}** (${ticker}).\n\n"
+            + ("\n\n".join(sections) if sections else "_No extra facts found for this one._")
+            + f"\n\n📄 [Disclosure filing]({filing_url})")
+    return {
+        "title": f"🔍 Radar Deep Dive · Politician · ${ticker}",
+        "url": filing_url,
+        "description": desc[:4000],
+        "color": 0xE67E22,
+        "footer": {"text": "📡 Insider Radar · public data (House Clerk, SEC, Senate LDA, USAspending) · "
                            "Not financial advice"},
     }
 
