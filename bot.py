@@ -544,6 +544,20 @@ def post_discord(webhook, embed, image=None):
     raise RuntimeError("Discord kept rate-limiting the webhook")
 
 
+def post_embeds(webhook, embeds):
+    """Post several embeds as one message (no image)."""
+    payload = {"username": "Insider Radar", "embeds": embeds}
+    for _ in range(3):
+        r = requests.post(webhook, json=payload, timeout=30)
+        if r.status_code == 429:
+            time.sleep(float(r.json().get("retry_after", 2)) + 0.5)
+            continue
+        r.raise_for_status()
+        time.sleep(1)
+        return
+    raise RuntimeError("Discord kept rate-limiting the webhook")
+
+
 # ---------------------------------------------------------------- cluster logic
 
 def find_cluster(state, ticker, today):
@@ -661,22 +675,28 @@ def run():
         posted += 1
         log(f"  posted {buy['ticker']} {name} {money(buy['value'])}")
 
-        # Radar Deep Dive for the strongest buys (separate channel, never stops the run)
-        deep_webhook = os.environ.get("WEBHOOK_DEEPDIVE", "").strip()
-        if deep_webhook and not bootstrap:
+        # #signals: the strongest buys explained from every angle (never stops the run)
+        signal_posted = False
+        if cluster_webhook and not bootstrap:
             try:
-                import deepdive
+                import signal_post
                 in_cluster = other_insiders(state, buy["ticker"], name, buy["trade_date"] or today) >= 2
-                if deepdive.wanted(buy, in_cluster):
+                if signal_post.wanted(buy, in_cluster):
                     buy["owner_label"] = f"{name} ({role_text(buy['owner']['roles'])})"
-                    post_discord(deep_webhook, deepdive.build(session, buy, rows, filing_url, in_cluster))
-                    log(f"  deep dive {buy['ticker']}")
+                    post_embeds(cluster_webhook, signal_post.build(session, buy, rows, filing_url, in_cluster))
+                    signal_posted = True
+                    log(f"  signal {buy['ticker']}")
+                    import record
+                    record.add(buy["ticker"], buy["company"], name, role_text(buy["owner"]["roles"]),
+                               buy["value"], buy["avg_price"], last_price,
+                               kind="cluster" if in_cluster else "insider",
+                               score=buy.get("score"), url=filing_url)
             except Exception as e:
-                log(f"  deep dive skipped: {e}")
+                log(f"  signal skipped: {e}")
 
         if cluster_webhook and not bootstrap:
             cluster = find_cluster(state, buy["ticker"], buy["trade_date"] or today)
-            if cluster:
+            if cluster and not signal_posted:      # the signal post already covers the cluster
                 cluster_img = make_cluster_chart(buy["ticker"], cluster, buy.get("exchange"))
                 post_discord(cluster_webhook, build_cluster_embed(buy["ticker"], buy["company"], cluster, buy.get("exchange"), buy), cluster_img)
                 log(f"  cluster alert {buy['ticker']}")
