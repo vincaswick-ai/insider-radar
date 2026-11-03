@@ -661,6 +661,19 @@ def run():
         posted += 1
         log(f"  posted {buy['ticker']} {name} {money(buy['value'])}")
 
+        # Radar Deep Dive for the strongest buys (separate channel, never stops the run)
+        deep_webhook = os.environ.get("WEBHOOK_DEEPDIVE", "").strip()
+        if deep_webhook and not bootstrap:
+            try:
+                import deepdive
+                in_cluster = other_insiders(state, buy["ticker"], name, buy["trade_date"] or today) >= 2
+                if deepdive.wanted(buy, in_cluster):
+                    buy["owner_label"] = f"{name} ({role_text(buy['owner']['roles'])})"
+                    post_discord(deep_webhook, deepdive.build(session, buy, rows, filing_url, in_cluster))
+                    log(f"  deep dive {buy['ticker']}")
+            except Exception as e:
+                log(f"  deep dive skipped: {e}")
+
         if cluster_webhook and not bootstrap:
             cluster = find_cluster(state, buy["ticker"], buy["trade_date"] or today)
             if cluster:
