@@ -358,6 +358,58 @@ def group_by(events, fn):
     return g
 
 
+def train_test(ev, split=2016):
+    """Pick insiders who beat the index BEFORE `split`, then look only at their buys AFTER it."""
+    before = defaultdict(list)
+    for e in ev:
+        if e.get("r6") is not None and e.get("exit6") and e["exit6"].year < split:
+            before[e["owner"]].append(e["r6"])
+    after = [e for e in ev if e["filed"].year >= split and e.get("r6") is not None]
+    lines = [f"\n### Pick the winners using {2006}-{split - 1}, then follow ONLY them in {split}-2026",
+             "| Who we follow | Insiders | Their buys after | 6M avg vs index | 6M median | Beat index | 3M avg |",
+             "|---|---|---|---|---|---|---|"]
+    rules = [("Everyone (baseline)", lambda r: True, 0),
+             ("Beat index on average, 3+ buys", lambda r: st.mean(r) > 0, 3),
+             ("Beat index on average, 5+ buys", lambda r: st.mean(r) > 0, 5),
+             ("Avg +10%+ and won 60%+, 3+ buys", lambda r: st.mean(r) > .10 and sum(v > 0 for v in r) / len(r) >= .6, 3),
+             ("Avg +10%+ and won 60%+, 5+ buys", lambda r: st.mean(r) > .10 and sum(v > 0 for v in r) / len(r) >= .6, 5),
+             ("Avg +20%+ and won 70%+, 4+ buys", lambda r: st.mean(r) > .20 and sum(v > 0 for v in r) / len(r) >= .7, 4),
+             ("Losers: avg below index, 3+ buys", lambda r: st.mean(r) <= 0, 3)]
+    best_list = []
+    for label, ok, n_min in rules:
+        if label.startswith("Everyone"):
+            chosen, evs = None, after
+        else:
+            chosen = {o for o, r in before.items() if len(r) >= n_min and ok([max(min(v, 3), -1) for v in r])}
+            evs = [e for e in after if e["owner"] in chosen]
+            if label.startswith("Avg +10%+ and won 60%+, 3+"):
+                best_list = chosen
+        s6, s3 = stats([e["r6"] for e in evs]), stats([e.get("r3") for e in evs])
+        if not s6:
+            lines.append(f"| {label} | {len(chosen or [])} | {len(evs)} | too few | | | |")
+            continue
+        lines.append(f"| {label} | {len(chosen) if chosen is not None else '–'} | {s6['n']:,} | "
+                     f"{s6['mean'] * 100:+.1f}% | {s6['median'] * 100:+.1f}% | {s6['win'] * 100:.0f}% | "
+                     f"{(s3['mean'] * 100 if s3 else 0):+.1f}% |")
+    # examples: the chosen insiders who kept buying after the split
+    rows = []
+    for o in best_list:
+        mine = [e for e in after if e["owner"] == o]
+        if len(mine) >= 2:
+            rows.append((st.mean([e["r6"] for e in mine]), mine[-1]["name"], mine[-1]["ticker"], len(before[o]),
+                         st.mean(before[o]), len(mine)))
+    rows.sort(reverse=True)
+    if rows:
+        lines.append("\nExamples (picked as winners before 2016 → how their later buys did):")
+        lines.append("| Insider | Ticker | Buys before | Avg before | Buys after | Avg after |")
+        lines.append("|---|---|---|---|---|---|")
+        for r in rows[:8] + rows[-5:]:
+            lines.append(f"| {r[1]} | {r[2]} | {r[3]} | {r[4] * 100:+.0f}% | {r[5]} | {r[0] * 100:+.0f}% |")
+        good = sum(1 for r in rows if r[0] > 0)
+        lines.append(f"\n{good} of {len(rows)} picked winners ({good / len(rows):.0%}) still beat the index after.")
+    return "\n".join(lines)
+
+
 def main():
     start = int(os.environ.get("START_YEAR") or 2006)
     end = int(os.environ.get("END_YEAR") or date.today().year)
@@ -449,6 +501,7 @@ def main():
     }, ev))
     out.append("\n_Survivorship bias: bankrupt/acquired companies often have no prices and drop out. "
                "Compare groups with each other rather than trusting the absolute numbers._")
+    out.append(train_test(ev))
     md = "\n".join(out)
     with open(os.path.join(HERE, "backtest_results.md"), "w", encoding="utf-8") as f:
         f.write(md)
