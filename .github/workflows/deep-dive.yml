@@ -1,4 +1,4 @@
-name: Deep dive
+name: Signal preview
 
 on:
   workflow_dispatch:
@@ -26,13 +26,13 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - name: Build and post the deep dive
+      - name: Build and post the signal
         env:
           SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
-          WEBHOOK_DEEPDIVE: ${{ secrets.WEBHOOK_DEEPDIVE }}
+          WEBHOOK_CLUSTER: ${{ secrets.WEBHOOK_CLUSTER }}
           WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
           LDA_API_KEY: ${{ secrets.LDA_API_KEY }}
           TICKER: ${{ inputs.ticker }}
           NAME: ${{ inputs.name }}
           TARGET: ${{ inputs.target }}
-        run: python deepdive.py
+        run: python signal_post.py

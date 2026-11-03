@@ -1,0 +1,53 @@
+name: Track record
+
+on:
+  schedule:
+    # Saturdays 15:10 UTC (17:10 in Vilnius)
+    - cron: "10 15 * * 6"
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Where to post"
+        type: choice
+        options: [test, public]
+        default: test
+      seed:
+        description: "Also add earlier strong alerts (score 7+) from alert history"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insider-alerts
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Build and post track record
+        env:
+          WEBHOOK_TRACK: ${{ secrets.WEBHOOK_TRACK }}
+          WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
+          TARGET: ${{ inputs.target || 'public' }}
+          SEED: ${{ inputs.seed && '1' || '0' }}
+        run: python record.py
+      - name: Save log
+        if: always()
+        run: |
+          if [ -f signals_log.json ] && [ -n "$(git status --porcelain signals_log.json)" ]; then
+            git config user.name "insider-radar-bot"
+            git config user.email "insider-radar-bot@users.noreply.github.com"
+            git add signals_log.json
+            git commit -m "Update track record log [skip ci]"
+            git pull --rebase --autostash || true
+            git push
+          fi
