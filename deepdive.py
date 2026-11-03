@@ -244,6 +244,7 @@ def earnings_date(ticker):
     try:
         r = requests.get(f"https://api.nasdaq.com/api/analyst/{ticker}/earnings-date", headers=BROWSER, timeout=15)
         text = ((r.json().get("data") or {}).get("announcement") or "")
+        log(f"  nasdaq earnings: HTTP {r.status_code} '{text[:80]}'")
         m = re.search(r"([A-Z][a-z]{2}) (\d{1,2}), (\d{4})", text)
         if m:
             return datetime.strptime(" ".join(m.groups()), "%b %d %Y").date()
@@ -257,6 +258,7 @@ def earnings_date(ticker):
         r = s.get(f"https://query1.finance.yahoo.com/v10/finance/quoteSummary/{ticker}",
                   params={"modules": "calendarEvents", "crumb": crumb}, timeout=15)
         ev = r.json()["quoteSummary"]["result"][0]["calendarEvents"]["earnings"]["earningsDate"]
+        log(f"  yahoo earnings: {ev}")
         if ev:
             return datetime.fromtimestamp(ev[0]["raw"], timezone.utc).date()
     except Exception as e:
@@ -344,7 +346,9 @@ def house_votes(words, today):
             title = re.sub(r"\s+", " ", (item.findtext("floor-text") or "").strip())
             if title and any(w in title.lower() for w in words):
                 out.append(f"{num} – {title[:110]}" if num else title[:120])
+        log(f"  House floor {stamp}: {sum(1 for _ in root.iter('floor-item'))} bills, {len(out)} match")
         return out[:3]
+    log(f"  House floor schedule {stamp} not found")
     return []
 
 
@@ -424,6 +428,8 @@ def contracts(company, today):
     try:
         r = requests.post("https://api.usaspending.gov/api/v2/search/spending_by_award/", json=body, timeout=30)
         rows = r.json().get("results") or []
+        log(f"  USAspending: HTTP {r.status_code}, {len(rows)} awards, names: "
+            f"{sorted({x.get('Recipient Name') for x in rows})[:5]} {r.text[:200] if r.status_code != 200 else ''}")
     except Exception as e:
         log(f"  USAspending unavailable: {e}")
         return []
