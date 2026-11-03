@@ -1,0 +1,47 @@
+name: Conviction Clusters follow-up
+
+on:
+  schedule:
+    # Mon-Fri: ~1h after the US open (sell-day reminders) and after the close (results, Friday summary)
+    - cron: "40 15 * * 1-5"
+    - cron: "40 21 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "remind / results / auto"
+        default: "auto"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: insider-alerts
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Reminders and results
+        env:
+          WEBHOOK_CONVICTION: ${{ secrets.WEBHOOK_CONVICTION }}
+          WEBHOOK_CONV_RECORD: ${{ secrets.WEBHOOK_CONV_RECORD }}
+          MODE: ${{ inputs.mode || 'auto' }}
+        run: python conviction_live.py
+      - name: Save log
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain conviction_log.json)" ]; then
+            git config user.name "insider-radar-bot"
+            git config user.email "insider-radar-bot@users.noreply.github.com"
+            git add conviction_log.json
+            git commit -m "Update conviction log [skip ci]"
+            git pull --rebase --autostash || true
+            git push
+          fi

@@ -31,6 +31,7 @@ jobs:
         env:
           WEBHOOK_INSIDER_BUYS: ${{ secrets.WEBHOOK_INSIDER_BUYS }}
           WEBHOOK_CLUSTER: ${{ secrets.WEBHOOK_CLUSTER }}
+          WEBHOOK_CONVICTION: ${{ secrets.WEBHOOK_CONVICTION }}
           WEBHOOK_DEEPDIVE: ${{ secrets.WEBHOOK_DEEPDIVE }}
           LDA_API_KEY: ${{ secrets.LDA_API_KEY }}
           SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
@@ -40,11 +41,11 @@ jobs:
       - name: Save state
         if: always()
         run: |
-          if [ -n "$(git status --porcelain state.json signals_log.json)" ]; then
+          if [ -n "$(git status --porcelain state.json signals_log.json conviction_log.json)" ]; then
             git config user.name "insider-radar-bot"
             git config user.email "insider-radar-bot@users.noreply.github.com"
-            touch signals_log.json
-            git add state.json signals_log.json
+            touch signals_log.json conviction_log.json
+            git add state.json signals_log.json conviction_log.json
             git commit -m "Update state [skip ci]"
             git push
           fi
