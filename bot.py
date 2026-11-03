@@ -165,6 +165,31 @@ def nice_name(raw):
     return " ".join(_cap(p) for p in parts + suffix)
 
 
+FUND_RE = re.compile(r"\b(fund|funds|municipal\w*|closed[- ]end|etf|acquisition corp(oration)?|acquisition co|"
+                     r"income trust|opportunities trust|bdc)\b", re.I)
+
+
+def is_entity(raw):
+    words_up = {p.upper().replace(".", "") for p in raw.replace(",", " ").split()}
+    return bool(words_up & ENTITY_WORDS)
+
+
+def is_noise(buy):
+    """Closed-end funds, ETFs and SPACs: insider buying there says nothing about a business."""
+    company = buy.get("company") or ""
+    if FUND_RE.search(company):
+        return "fund / SPAC"
+    if re.fullmatch(r"[A-Z]{4}[UWR]", buy["ticker"]) and "acquisition" in company.lower():
+        return "SPAC unit"
+    return None
+
+
+def only_big_holder(buy):
+    """True if the buyer is just a 10% owner / fund (not an officer or director)."""
+    roles = [r.lower() for r in buy["owner"]["roles"]]
+    return all("10%" in r for r in roles) or (is_entity(buy["owner"]["name"]) and "director" not in roles)
+
+
 def nice_company(raw):
     if raw.isupper():
         words = []
@@ -397,8 +422,9 @@ def ticker_label(buy):
 def summary_line(buy):
     name = nice_name(buy["owner"]["name"])
     who = f"**{name}** ({role_text(buy['owner']['roles'])})"
+    own = "" if only_big_holder(buy) else " with their own money"
     line = (f"{who} bought **{money(buy['value'])}** of "
-            f"**{nice_company(buy['company'])}** (**{ticker_label(buy)}**) stock with their own money.")
+            f"**{nice_company(buy['company'])}** (**{ticker_label(buy)}**) stock{own}.")
     sc = buy["stake_change"]
     if buy.get("new_position"):
         line += " This looks like a **brand-new position** for them."
@@ -453,41 +479,34 @@ def short_text(short):
 
 
 def build_embed(buy, filed_date, filing_url):
-    trade = buy["trade_date"]
-    if buy["trade_date_end"] and buy["trade_date_end"] != trade:
-        trade = f"{trade} to {buy['trade_date_end']}"
-    fields = [
-        {"name": "Shares", "value": f"{buy['shares']:,.0f}", "inline": True},
-        {"name": "Avg price", "value": f"${buy['avg_price']:,.2f}", "inline": True},
-        {"name": "Total", "value": money(buy["value"]), "inline": True},
-        {"name": "Bought on", "value": trade or "n/a", "inline": True},
-        {"name": "Disclosed on", "value": filed_date, "inline": True},
-    ]
-    if buy["stake_change"] is not None:
-        fields.append({"name": "Stake change", "value": f"+{buy['stake_change']:.1f}%", "inline": True})
+    """Short, phone-friendly alert: one summary line + one facts line + chart."""
+    day = buy["trade_date"]
+    try:
+        day = datetime.fromisoformat(day).strftime("%b %d")
+    except (TypeError, ValueError):
+        pass
+    facts = [f"💵 avg price ${buy['avg_price']:,.2f}", f"📅 bought {day or 'n/a'}"]
+    if buy.get("drop") is not None and buy["drop"] >= 0.005:
+        facts.append(f"📉 {buy['drop'] * 100:.0f}% below 1-year high")
     cap = cap_text(buy)
     if cap:
-        fields.append({"name": "Market cap", "value": cap, "inline": True})
-    if buy.get("drop") is not None:
-        d = buy["drop"]
-        fields.append({"name": "From 52w high", "value": "at the high" if d < 0.005 else f"-{d * 100:.0f}%",
-                       "inline": True})
-    si = short_text(buy.get("short"))
-    if si:
-        fields.append({"name": "Short interest", "value": si, "inline": True})
+        facts.append(f"🏢 {cap}")
+    short = buy.get("short") or {}
+    if short.get("pct") and short["pct"] >= 0.10:
+        facts.append(f"🩳 {short['pct'] * 100:.0f}% of shares shorted")
     if buy.get("plan_10b5_1"):
-        fields.append({"name": "Note", "value": "Pre-planned trade (Rule 10b5-1)", "inline": True})
-    title = f"💼 Insider Buy · ${buy['ticker']}" + (f" ({buy['exchange']})" if buy.get("exchange") else "")
+        facts.append("🗓 pre-planned trade (10b5-1)")
+    title = f"💼 ${buy['ticker']}" + (f" ({buy['exchange']})" if buy.get("exchange") else "")
     if buy.get("sp500"):
         title += " · ⭐ S&P 500"
     return {
         "title": title,
         "url": filing_url,
         "description": (score_text(buy) + summary_line(buy) + record_text(buy)
-                        + f"\n\n📄 [View the official SEC filing]({filing_url})"),
+                        + "\n\n" + " · ".join(facts)
+                        + f"\n📄 [SEC filing]({filing_url})"),
         "color": 0x2ECC71,
-        "fields": fields,
-        "footer": {"text": "📡 Insider Radar · Source: SEC Form 4 · Not financial advice"},
+        "footer": {"text": "Insider Radar · Source: SEC Form 4 · Not financial advice"},
     }
 
 
@@ -657,6 +676,17 @@ def run():
         if last_price and not (0.33 <= buy["avg_price"] / last_price <= 3.0):
             log(f"  skip {buy['ticker']} {name}: price ${buy['avg_price']:,.2f} vs market ${last_price:,.2f} looks wrong")
             continue
+        noise = is_noise(buy)
+        if noise:
+            log(f"  skip {buy['ticker']} {name}: {noise}")
+            continue
+        # joint filings: the same purchase reported by several related owners (family trust + company...)
+        day = buy["trade_date"] or today
+        dup = next((b for b in state["buys"] if b["ticker"] == buy["ticker"] and b["date"] == day
+                    and b["name"] != name and abs(b["value"] - buy["value"]) <= 0.005 * buy["value"]), None)
+        if dup:
+            log(f"  skip {buy['ticker']} {name}: same purchase already reported by {dup['name']}")
+            continue
         # market cap + S&P 500 tag
         buy.update(company_info(session, buy.get("issuer_cik"), buy["ticker"], last_price))
 
@@ -681,6 +711,10 @@ def run():
                 log(f"  conviction check skipped: {e}")
 
         if buy["value"] < MIN_VALUE:        # small buys are only stored for cluster detection
+            continue
+        sc = buy.get("stake_change")
+        if only_big_holder(buy) and not buy.get("new_position") and (sc is None or sc < 5):
+            log(f"  not posted {buy['ticker']} {name}: big holder adding {sc or 0:.1f}%")
             continue
 
         if posted >= limit:

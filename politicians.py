@@ -350,6 +350,13 @@ def amount_top(text):
     return max(nums) if nums else 0
 
 
+MIN_POST_AMOUNT = 15_000   # post a filing only if some trade can be above $15K, or a buy matches a committee
+
+
+def worth_posting(trades):
+    return any(amount_top(t["amount"]) > MIN_POST_AMOUNT or (t["type"] == "P" and t.get("match")) for t in trades)
+
+
 def merge_same(trades):
     """Same stock, same side, same day (often several accounts) -> one line with a count."""
     out, index = [], {}
@@ -415,7 +422,8 @@ def build_embed(filing, label, trades, prices, committees=None, sic=None):
     trades = merge_same(trades)
     sic = sic or {}
     for t in trades:
-        t["match"] = committee_match((sic.get(t["ticker"]) or [None])[0], committees)
+        t["match"] = (committee_match((sic.get(t["ticker"]) or [None])[0], committees)
+                      if t["type"] == "P" else None)        # selling in your own sector says little
     # committee matches first, then purchases, then the biggest amounts
     trades = sorted(trades, key=lambda t: (t["match"] is None, t["type"] != "P", -amount_top(t["amount"])))
     n_buy = sum(t.get("count", 1) for t in trades if t["type"] == "P")
@@ -619,7 +627,7 @@ def run():
             sic = load_sic(state, {t["ticker"] for t in trades})
             member_comms = comms.get(member_id(legis, f["last"], f["state"]))
             for t in trades:
-                m = committee_match((sic.get(t["ticker"]) or [None])[0], member_comms)
+                m = committee_match((sic.get(t["ticker"]) or [None])[0], member_comms) if t["type"] == "P" else None
                 t["match"] = list(m) if m else None
             embed = build_embed(f, label, trades, prices, comms.get(member_id(legis, f["last"], f["state"])), sic)
             for t in trades:
@@ -627,6 +635,10 @@ def run():
                                         "date": t["date"].isoformat() if t["date"] else None,
                                         "amount": t["amount"], "filed": f["filed"].isoformat(),
                                         "url": f["url"], "match": t.get("match")})
+            if not worth_posting(trades):
+                log(f"  {label}: only small trades (max {compact_amount(max((t['amount'] for t in trades), key=amount_top))}), not posted")
+                state["seen"].append(f["id"])
+                continue
         if DEBUG:
             log(json.dumps(embed, indent=1, default=str))
             if TEST_ID and os.environ.get("WEBHOOK_PROOF"):
