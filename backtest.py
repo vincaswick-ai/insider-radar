@@ -293,6 +293,39 @@ def history_groups(events):
                     e["group"] = "Past loser (2+, avg <= 0)"
 
 
+def routine_flags(events):
+    """Cohen-Malloy-Pomorski: an insider who bought in each of the last 3 years is 'routine' if those buys
+    were in the same calendar month every year, otherwise 'opportunistic'."""
+    by_owner = defaultdict(list)
+    for e in events:
+        by_owner[e["owner"]].append(e)
+    for evs in by_owner.values():
+        months = {(x["traded"].year, x["traded"].month) for x in evs}
+        years = {x["traded"].year for x in evs}
+        for e in evs:
+            y, m = e["traded"].year, e["traded"].month
+            if not all(y - k in years for k in (1, 2, 3)):
+                e["pattern"] = "Not enough history"
+            elif all((y - k, m) in months for k in (1, 2, 3)):
+                e["pattern"] = "Routine (same month 3 years running)"
+            else:
+                e["pattern"] = "Opportunistic"
+
+
+def score(e):
+    r = role(e)
+    pts = {"CEO/CFO/President/Chair": 3, "Other officer": 2, "Director": 1}.get(r, 0.5)
+    v = e["value"]
+    pts += 2 if v >= 1e6 else 1.5 if v >= 2.5e5 else 1 if v >= 1e5 else 0.5
+    d = e.get("drop") or 0
+    pts += 2 if d >= .4 else 1 if d >= .2 else 0
+    pts += 1.5 if e.get("cluster") else 0
+    if e.get("prior_n"):
+        pts += 0.5 + (0.5 if (e.get("prior_avg") or 0) > 0 else 0)
+    pts -= 2 if e.get("plan") else 0
+    return round(pts)
+
+
 def clusters(events):
     by_issuer = defaultdict(list)
     for e in events:
@@ -348,10 +381,11 @@ def main():
     log(f"  buy events $25K+: {len(events):,}")
 
     log("2/4 Downloading prices")
-    prices = load_prices({e["ticker"] for e in events} | {"SPY"})
-    spy = prices.get("SPY")
+    bench = (os.environ.get("BENCH") or "SPY").upper()
+    prices = load_prices({e["ticker"] for e in events} | {bench})
+    spy = prices.get(bench)
     if not spy:
-        sys.exit("No SPY prices")
+        sys.exit(f"No {bench} prices")
 
     log("3/4 Measuring results")
     for e in events:
@@ -364,16 +398,17 @@ def main():
         f"{sum(1 for e in events if e['ticker'] not in prices):,}, price mismatch: {bad:,})")
     history_groups(events)
     clusters(events)
+    routine_flags(events)
     ev = [e for e in events if e.get("r6") is not None or e.get("r3") is not None]
 
     log("4/4 Writing results")
     order = ["First buy (no history)", "Earlier buys, results not known yet", "1 earlier result: lost",
              "1 earlier result: won", "Past loser (2+, avg <= 0)", "Past winner (2+, avg > 0)",
              "Proven winner (2+, avg > +10%, 60%+ wins)"]
-    out = [f"# Insider Radar backtest ({start}–{end})",
+    out = [f"# Insider Radar backtest ({start}–{end}) · benchmark: {bench}",
            f"Buy events ($25K+ open-market purchases, same insider + company within 14 days = one event): "
            f"**{len(events):,}**, with prices: **{len(ev):,}**.",
-           "Entry: close of the first trading day after the Form 4 filing. Results are returns minus SPY "
+           f"Entry: close of the first trading day after the Form 4 filing. Results are returns minus {bench} "
            "over the same days (dividends included). Averages cap single results at +300% so one "
            "moonshot can't fake a result.",
            table("ALL buys", {"All buy events": ev}, ev),
@@ -392,7 +427,15 @@ def main():
         "$100-250K" if e["value"] >= 1e5 else "$25-100K"), ev))
     out.append(table("Cluster buys (3+ insiders within 30 days)", group_by(
         ev, lambda e: "Cluster" if e.get("cluster") else "Single"), ev))
+    out.append(table("Routine vs opportunistic (Cohen-Malloy-Pomorski)", group_by(
+        ev, lambda e: e.get("pattern")), ev, ["Routine (same month 3 years running)", "Opportunistic",
+                                               "Not enough history"]))
+    out.append(table("Our Insider Score (approximate, without stake size and short interest)", group_by(
+        ev, lambda e: "Score 8-10" if score(e) >= 8 else "Score 5-7" if score(e) >= 5 else "Score 1-4"), ev,
+        ["Score 1-4", "Score 5-7", "Score 8-10"]))
     out.append(table("Strategy ideas", {
+        "Opportunistic + 40%+ drop": [e for e in ev if e.get("pattern") == "Opportunistic" and (e.get("drop") or 0) >= .4],
+        "Opportunistic CEO/CFO": [e for e in ev if e.get("pattern") == "Opportunistic" and role(e).startswith("CEO")],
         "CEO/CFO buy after 30%+ drop": [e for e in ev if role(e).startswith("CEO") and (e.get("drop") or 0) >= .3],
         "Cluster + 30%+ drop": [e for e in ev if e.get("cluster") and (e.get("drop") or 0) >= .3],
         "Proven winner buys again": [e for e in ev if e.get("group", "").startswith("Proven")],
