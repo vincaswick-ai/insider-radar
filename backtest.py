@@ -337,7 +337,7 @@ def clusters(events):
 
 
 def table(title, groups, events, order=None):
-    lines = [f"\n### {title}", "| Group | 6M buys | 6M avg vs S&P | 6M median | 6M beat S&P | 3M avg vs S&P |",
+    lines = [f"\n### {title}", "| Group | 6M buys | 6M avg vs index | 6M median | 6M beat index | 3M avg vs index |",
              "|---|---|---|---|---|---|"]
     keys = order or sorted(groups)
     for g in keys:
@@ -418,6 +418,12 @@ def main():
         part = [e for e in ev if a <= e["filed"].year <= b]
         out.append(table(f"Same question, only {a}–{b} (does it hold in every period?)",
                          group_by(part, lambda e: e.get("group")), part, order))
+        out.append(table(f"Insider Score, only {a}–{b}", group_by(
+            part, lambda e: "Score 8-10" if score(e) >= 8 else "Score 5-7" if score(e) >= 5 else "Score 1-4"),
+            part, ["Score 1-4", "Score 5-7", "Score 8-10"]))
+        out.append(table(f"Price drop, only {a}–{b}", group_by(
+            part, lambda e: None if e.get("drop") is None else "40%+ below high" if e["drop"] >= .4 else
+            "20-40% below" if e["drop"] >= .2 else "within 20% of high"), part))
     out.append(table("By role", group_by(ev, role), ev))
     out.append(table("By price drop from 1-year high", group_by(
         ev, lambda e: None if e.get("drop") is None else "40%+ below high" if e["drop"] >= .4 else
