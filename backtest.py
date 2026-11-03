@@ -171,7 +171,8 @@ def fetch(ticker):
     t = ticker.replace(".", "-")
     for i in range(3):
         try:
-            r = requests.get(PRICE_URL.format(t=t), params={"range": "max", "interval": "1d", "events": "split"},
+            r = requests.get(PRICE_URL.format(t=t), params={"period1": 1104537600, "period2": int(time.time()), "interval": "1d",
+                                     "events": "split"},
                              headers={"User-Agent": UA_BROWSER}, timeout=30)
             if r.status_code == 429:
                 time.sleep(5 + 10 * i)
