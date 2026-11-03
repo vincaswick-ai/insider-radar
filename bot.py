@@ -13,6 +13,7 @@ What it does on every run:
 Configuration (environment variables / GitHub secrets):
   WEBHOOK_INSIDER_BUYS  (required) Discord webhook URL for insider buys
   WEBHOOK_CLUSTER       (optional) Discord webhook URL for cluster alerts
+  WEBHOOK_CONVICTION    (optional) Discord webhook URL for #conviction-alerts (Strategy #1)
   SEC_USER_AGENT        (required by SEC) e.g. "InsiderRadar yourname@example.com"
   MIN_VALUE             (optional) minimum buy size in USD, default 50000
 """
@@ -27,6 +28,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
+import conviction_live
 from chart import make_chart, make_cluster_chart
 from company import company_info
 from score import drop_from_high, insider_score, score_bar, short_interest, track_record
@@ -55,6 +57,7 @@ MAX_POSTS_PER_RUN = 15         # safety cap so a backlog never spams the channel
 BOOTSTRAP_POSTS = 3            # on the very first run, post only a few examples
 CLUSTER_WINDOW_DAYS = 14
 CLUSTER_MIN_INSIDERS = 3
+CONVICTION_MIN_EACH = conviction_live.MIN_EACH   # buys this small are stored (not posted) for Conviction Clusters
 KEEP_SEEN = 6000
 KEEP_BUYS_DAYS = 30
 REQUEST_PAUSE = 0.15           # SEC allows max 10 requests/second
@@ -565,7 +568,7 @@ def find_cluster(state, ticker, today):
     since = (datetime.fromisoformat(today) - timedelta(days=CLUSTER_WINDOW_DAYS)).date().isoformat()
     latest_per_insider = {}
     for b in state["buys"]:
-        if b["ticker"] == ticker and b["date"] >= since:
+        if b["ticker"] == ticker and b["date"] >= since and b["value"] >= MIN_VALUE:
             latest_per_insider[b["name"]] = b
     if len(latest_per_insider) < CLUSTER_MIN_INSIDERS:
         return None
@@ -581,7 +584,7 @@ def other_insiders(state, ticker, name, day):
     """How many OTHER insiders bought this stock in the cluster window."""
     since = (datetime.fromisoformat(day) - timedelta(days=CLUSTER_WINDOW_DAYS)).date().isoformat()
     return len({b["name"] for b in state["buys"]
-                if b["ticker"] == ticker and b["date"] >= since and b["name"] != name})
+                if b["ticker"] == ticker and b["date"] >= since and b["name"] != name and b["value"] >= MIN_VALUE})
 
 
 def add_score(session, buy, rows, state, name, today):
@@ -603,6 +606,7 @@ def add_score(session, buy, rows, state, name, today):
 def run():
     webhook = os.environ.get("WEBHOOK_INSIDER_BUYS", "").strip()
     cluster_webhook = os.environ.get("WEBHOOK_CLUSTER", "").strip()
+    conviction_webhook = os.environ.get("WEBHOOK_CONVICTION", "").strip()
     if not webhook:
         sys.exit("WEBHOOK_INSIDER_BUYS is not set.")
     if not USER_AGENT or "@" not in USER_AGENT:
@@ -638,7 +642,7 @@ def run():
         except Exception as e:          # one bad filing must not stop the run
             log(f"  skip {accession}: {e}")
             continue
-        if not buy or buy["value"] < MIN_VALUE:
+        if not buy or buy["value"] < min(MIN_VALUE, CONVICTION_MIN_EACH):
             continue
         buys_found += 1
 
@@ -662,7 +666,22 @@ def run():
             "role": role_text(buy["owner"]["roles"]), "value": round(buy["value"], 2),
             "date": buy["trade_date"] or today, "accession": accession, "url": filing_url,
             "price": round(buy["avg_price"], 4), "filed": today,
+            "stake": conviction_live.stake_of(buy),
         })
+
+        # Strategy #1: Conviction Clusters (judged on every stored buy, never stops the run)
+        if conviction_webhook and not bootstrap:
+            try:
+                sig = conviction_live.check(state, buy["ticker"], buy["trade_date"] or today)
+                if sig:
+                    buy["drop"] = drop_from_high(rows)
+                    conviction_live.post_alert(conviction_webhook, sig, buy)
+                    log(f"  CONVICTION CLUSTER {buy['ticker']}")
+            except Exception as e:
+                log(f"  conviction check skipped: {e}")
+
+        if buy["value"] < MIN_VALUE:        # small buys are only stored for cluster detection
+            continue
 
         if posted >= limit:
             continue
