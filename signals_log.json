@@ -28,5 +28,20 @@
   "signal_price": 111.71,
   "url": "https://www.sec.gov/Archives/edgar/data/1650729/000110465926122247/xslF345X06/tm2628894-2_4seq1.xml",
   "source": "live"
+ },
+ {
+  "id": 3,
+  "posted": "2026-11-04T18:46+00:00",
+  "ticker": "INTC",
+  "company": "INTEL CORP",
+  "insider": "Lip Bu Tan",
+  "role": "CEO, Director",
+  "kind": "insider",
+  "score": 8,
+  "value": 9709680,
+  "insider_price": 64.7312,
+  "signal_price": 58.26,
+  "url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000195/xslF345X06/form4.xml",
+  "source": "live"
  }
 ]
