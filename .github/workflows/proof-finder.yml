@@ -1,9 +1,7 @@
 name: Proof finder
 
 on:
-  schedule:
-    # every Saturday ~09:00 Vilnius time (07:00 UTC), ready for content day
-    - cron: "0 7 * * 6"
+  # schedule turned off in the Nov 2026 redesign (its channel was removed); run by hand if needed
   workflow_dispatch:
     inputs:
       min_value:

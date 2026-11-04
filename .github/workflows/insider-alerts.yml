@@ -27,12 +27,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Card fonts (Inter + emoji)
+        run: sudo apt-get install -y -qq fonts-inter fonts-noto-color-emoji >/dev/null 2>&1 || (sudo apt-get update -qq && sudo apt-get install -y -qq fonts-inter fonts-noto-color-emoji) || true
+
       - name: Check SEC filings and post alerts
         env:
           WEBHOOK_INSIDER_BUYS: ${{ secrets.WEBHOOK_INSIDER_BUYS }}
-          WEBHOOK_CLUSTER: ${{ secrets.WEBHOOK_CLUSTER }}
           WEBHOOK_CONVICTION: ${{ secrets.WEBHOOK_CONVICTION }}
-          WEBHOOK_DEEPDIVE: ${{ secrets.WEBHOOK_DEEPDIVE }}
+          WEBHOOK_CASE_FILES: ${{ secrets.WEBHOOK_CASE_FILES }}
           LDA_API_KEY: ${{ secrets.LDA_API_KEY }}
           SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
           MIN_VALUE: ${{ vars.MIN_VALUE || '50000' }}
@@ -41,11 +43,11 @@ jobs:
       - name: Save state
         if: always()
         run: |
-          if [ -n "$(git status --porcelain state.json signals_log.json conviction_log.json)" ]; then
+          if [ -n "$(git status --porcelain state.json signals_log.json conviction_log.json casefiles_cache.json)" ]; then
             git config user.name "insider-radar-bot"
             git config user.email "insider-radar-bot@users.noreply.github.com"
-            touch signals_log.json conviction_log.json
-            git add state.json signals_log.json conviction_log.json
+            touch signals_log.json conviction_log.json casefiles_cache.json
+            git add state.json signals_log.json conviction_log.json casefiles_cache.json
             git commit -m "Update state [skip ci]"
             git push
           fi

@@ -1,9 +1,7 @@
 name: Portfolio and weekly recap
 
 on:
-  schedule:
-    # every weekday after the US close (21:40 UTC); on Fridays it also posts the weekly recap
-    - cron: "40 21 * * 1-5"
+  # schedule turned off in the Nov 2026 redesign (its channel was removed); run by hand if needed
   workflow_dispatch:
     inputs:
       recap:

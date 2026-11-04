@@ -1,9 +1,7 @@
 name: Leaderboard
 
 on:
-  schedule:
-    # Sundays 16:20 UTC (18:20 in Vilnius)
-    - cron: "20 16 * * 0"
+  # schedule turned off in the Nov 2026 redesign (its channel was removed); run by hand if needed
   workflow_dispatch:
     inputs:
       target:

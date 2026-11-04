@@ -34,6 +34,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
+      - name: Card fonts (Inter + emoji)
+        run: sudo apt-get install -y -qq fonts-inter fonts-noto-color-emoji >/dev/null 2>&1 || (sudo apt-get update -qq && sudo apt-get install -y -qq fonts-inter fonts-noto-color-emoji) || true
       - name: Check Congress filings and post alerts
         env:
           WEBHOOK_POLITICIANS: ${{ secrets.WEBHOOK_POLITICIANS }}
@@ -43,7 +45,6 @@ jobs:
           POL_TEST_POST: ${{ inputs.test_post || '' }}
           POL_LOOKBACK_DAYS: ${{ inputs.test_post && '30' || '10' }}
           WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
-          WEBHOOK_DEEPDIVE: ${{ secrets.WEBHOOK_DEEPDIVE }}
           LDA_API_KEY: ${{ secrets.LDA_API_KEY }}
         run: python politicians.py
       - name: Save state

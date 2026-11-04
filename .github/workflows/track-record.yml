@@ -1,9 +1,7 @@
 name: Track record
 
 on:
-  schedule:
-    # Saturdays 15:10 UTC (17:10 in Vilnius)
-    - cron: "10 15 * * 6"
+  # schedule turned off in the Nov 2026 redesign (its channel was removed); run by hand if needed
   workflow_dispatch:
     inputs:
       target:
