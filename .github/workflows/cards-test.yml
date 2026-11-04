@@ -1,0 +1,21 @@
+name: Cards test
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Card fonts (Inter + emoji)
+        run: sudo apt-get install -y -qq fonts-inter fonts-noto-color-emoji >/dev/null 2>&1 || (sudo apt-get update -qq && sudo apt-get install -y -qq fonts-inter fonts-noto-color-emoji) || true
+      - name: Render and post test cards to #bot-testing
+        env:
+          WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
+        run: python cards_test.py
