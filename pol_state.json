@@ -14,7 +14,8 @@
   "H20035734",
   "H20035743",
   "H20035484",
-  "H20035751"
+  "H20035751",
+  "H20035763"
  ],
  "trades": [
   {
@@ -224,6 +225,16 @@
    "filed": "2026-11-01",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035484.pdf",
    "match": null
+  },
+  {
+   "who": "Robert E. Latta (R-OH)",
+   "ticker": "FMAO",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-03",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035763.pdf",
+   "match": null
   }
  ],
  "sic": {
@@ -258,6 +269,10 @@
   "MU": [
    3674,
    "Semiconductors & Related Devices"
+  ],
+  "FMAO": [
+   6035,
+   "Savings Institution, Federally Chartered"
   ]
  }
 }
