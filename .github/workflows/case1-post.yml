@@ -1,0 +1,19 @@
+name: Post Case File 001
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Post Case File 001 to #case-files
+        env:
+          WEBHOOK_CASE_FILES: ${{ secrets.WEBHOOK_CASE_FILES }}
+        run: python post_case1.py
