@@ -155,7 +155,7 @@ def add_trading_days(d, n):
 # ---------------------------------------------------------------- Discord
 
 def post(webhook, embed=None, content=None):
-    payload = {"username": "Insider Radar"}
+    payload = {"username": "Insider Radar", "avatar_url": "https://raw.githubusercontent.com/vincaswick-ai/insider-radar/main/logo.png"}
     if embed:
         payload["embeds"] = [embed]
     if content:

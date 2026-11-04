@@ -22,6 +22,7 @@ import requests
 import cards
 
 LOOKAHEAD_DAYS = 45
+CASE_NUMBER_START = 2      # Case #001 (Enphase, midterms) was posted by hand
 MIN_VALUE = 100_000
 CACHE_FILE = "casefiles_cache.json"
 EVENTS_FILE = "events.json"
@@ -270,7 +271,7 @@ def maybe_open(webhook, state, buy, info):
         return False
 
     first = events[0]
-    n = len(cases) + 1
+    n = len(cases) + CASE_NUMBER_START
     drop = buy.get("drop")
     drop_text = f"🔴 **−{drop * 100:.0f}%** from its 1-year high" if drop and drop >= 0.05 else "near its 1-year high"
     title = (f"${t} · {info['company_short']}'s {info['role_short']} buys {money(buy['value'])}, "

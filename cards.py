@@ -12,7 +12,8 @@ import time
 import requests
 
 GREEN, RED, BLUE, YELLOW, PURPLE, ORANGE = 0x57F287, 0xED4245, 0x00A8FC, 0xFEE75C, 0x9B59B6, 0xF0B232
-FOOT = "Insider Radar · Not financial advice"
+FOOT = "Not financial advice"
+AVATAR = "https://raw.githubusercontent.com/vincaswick-ai/insider-radar/main/logo.png"
 
 
 def esc(x):
@@ -64,7 +65,7 @@ def post_card(webhook, content, embed, name=None):
             embed["url"] = links[0][1]
         line = " · ".join(f"[{t}]({u})" for t, u in links)
         embed["fields"] = embed.get("fields", []) + [f("🔗 Links", line, False)]
-    payload = {"username": "Insider Radar", "embeds": [embed], "allowed_mentions": {"parse": []}}
+    payload = {"username": "Insider Radar", "avatar_url": AVATAR, "embeds": [embed], "allowed_mentions": {"parse": []}}
     for _ in range(5):
         r = requests.post(webhook, json=payload, timeout=30)
         if r.status_code == 429:
@@ -120,8 +121,7 @@ def buy_card(d):
         "author": {"name": head + (f"  ·  {tags}" if tags else "")},
         "title": f"${d['ticker']} · {d['company_short']}'s {who_short} buys {money(d['value'])} of stock",
         "fields": fields,
-        "footer": {"text": "Insider Radar · Source: SEC Form 4 · Not financial advice"
-                           + (f"  |  {d['footer_right']}" if d.get("footer_right") else "")},
+        "footer": {"text": (f"{d['footer_right']} · " if d.get("footer_right") else "") + "SEC Form 4 · Not financial advice"},
     }
 
 
@@ -148,7 +148,7 @@ def conviction_card(d):
         "description": "Our tested rule just triggered: **3+ insiders** buying within 7 days, with big money or big stake increases."
                        + (f"\n*{d['company']}*" if d.get("company") else ""),
         "fields": fields,
-        "footer": {"text": "Tracked live, results in #track-record · Not financial advice  |  Signal open 🟠"},
+        "footer": {"text": "Tracked live in #track-record · Not financial advice"},
     }
 
 
@@ -162,11 +162,11 @@ def result_card(d):
         "title": f"${d['ticker']} closed: {pct(d['ret'])} vs S&P {pct(d['spy'])}",
         "fields": [
             f(f"Entry · {d['entry_day']}", f"${d['entry']:,.2f}"), f(f"Exit · {d['exit_day']}", f"${d['exit']:,.2f}"),
-            f("Result", f"{dot(d['ret'])} **{pct(d['ret'])}**\n{'beat' if d['excess'] > 0 else 'lagged'} S&P by **{abs(d['excess']) * 100:.1f} pts**"),
+            f("Result", f"{'✅' if d['excess'] > 0 else '❌'} **{pct(d['ret'])}**\n{'beat' if d['excess'] > 0 else 'lagged'} S&P by **{abs(d['excess']) * 100:.1f} pts**"),
             f("🧮 Signals", f"**{t['n']}**"), f("Beat the S&P", f"**{t['wins']} / {t['n']}**"),
             f("Avg vs S&P", f"{dot(t['avg'])} **{pct(t['avg'])}**"),
         ],
-        "footer": {"text": f"Every signal is counted, wins and losses · Not financial advice  |  Signal closed {'✅' if d['excess'] > 0 else '❌'}"},
+        "footer": {"text": "Every signal counts, wins and losses · Not financial advice"},
     }
 
 
@@ -185,7 +185,7 @@ def weekly_card(d):
         "author": {"name": "📊 WEEKLY UPDATE · CONVICTION CLUSTERS"},
         "title": "This week in the strategy",
         "fields": fields,
-        "footer": {"text": "Backtest expectation: about +1.5% vs S&P per signal, ~50% win rate · Not financial advice"},
+        "footer": {"text": "Backtest: about +1.5% vs S&P per signal, ~50% win rate · Not financial advice"},
     }
 
 
@@ -216,7 +216,7 @@ def politician_card(d):
         "author": {"name": f"🏛 POLITICIAN TRADE · {d['chamber'].upper()} · DISCLOSED {d['filed'].upper()}"},
         "title": f"{d['label']} {verb} " + ", ".join(f"${x}" for x in tickers[:3]) + (f" +{len(tickers) - 3} more" if len(tickers) > 3 else ""),
         "fields": fields,
-        "footer": {"text": "Source: STOCK Act disclosures · Congress reports amount ranges only · Not financial advice"},
+        "footer": {"text": "STOCK Act disclosure · amounts are ranges · Not financial advice"},
     }
 
 
@@ -244,23 +244,23 @@ def case_card(d):
                         + (f"[see current odds]({m['url']})" if m.get("url") else "see link below"), False))
     return {
         "color": YELLOW,
-        "author": {"name": " · ".join(x for x in [f"🔎 CASE FILE #{d['number']:03d}", (d.get("sector") or "").upper(), d.get("exchange")] if x)},
+        "author": {"name": " · ".join(x for x in [f"🔎 CASE FILE #{d['number']:03d}", (d.get("sector") or "").upper(), d.get("exchange"), "🟡 OPEN"] if x)},
         "title": d["title"],
         "description": d["summary"],
         "fields": fields,
-        "footer": {"text": "We don't know why insiders buy. We show what's coming next. · Not financial advice  |  Case open 🟡"},
+        "footer": {"text": "We show what's coming next, not why they bought · Not financial advice"},
     }
 
 
 def case_update_card(d):
     return {
         "color": GREEN if d["ret"] >= 0 else RED,
-        "author": {"name": f"✅ CASE FILE #{d['number']:03d} · UPDATE"},
+        "author": {"name": f"✅ CASE FILE #{d['number']:03d} · CLOSED"},
         "title": f"The event happened: {d['event']}",
         "fields": [
             f("Insider's price", f"${d['buy_price']:,.2f}"), f("Now", f"${d['now_price']:,.2f}"),
             f("Since the buy", f"{dot(d['ret'])} **{pct(d['ret'])}** in {d['days']} days"
                                + (f"\nS&P {pct(d['spy'])}" if d.get("spy") is not None else "")),
         ] + ([f("Note", d["note"], False)] if d.get("note") else []),
-        "footer": {"text": "Every case gets a result, good or bad · Not financial advice  |  Case closed"},
+        "footer": {"text": "Every case gets a result, good or bad · Not financial advice"},
     }
