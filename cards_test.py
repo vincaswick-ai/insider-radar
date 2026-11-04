@@ -22,6 +22,15 @@ if hook:
     cards.post_card(hook, "🧪 **Card test** · case file", cards.case_card(dict(
         number=0, ticker="TEST", sector="Solar", exchange="NASDAQ", title="$TEST · Test's CEO buys $267K, 1 day before the midterms",
         summary="Format test.", who="Test Person", role="CEO", value=267514, shares=10000, price=26.75, drop_text="−20% in one day",
-        company_desc="Solar equipment", filed="Nov 02", timeline=[dict(when="Nov 02 · today", text="CEO buys", color="#57f287")],
-        scenarios=None, market=None)))
+        company_desc="Solar equipment", filed="Nov 02", timeline=[dict(when="Oct 28 · what hurt the company", icon="🔴", text="Revenue **−28.5%**."),
+                  dict(when="Nov 02 · today", icon="🟢", text="CEO buys **$267K** near the low."),
+                  dict(when="Nov 03 · in 1 day ⏳", icon="🟡", text="**US midterm elections.** Control of Congress decides solar tax credits.")],
+        scenarios=[["If Democrats win Congress", "Solar tax credits back on the table."], ["If Republicans hold", "Weak US demand likely continues."]],
+        market=dict(question="Which party wins the House?", yes_label="DEM", yes=0.64, no_label="GOP", no=0.36, when="Nov 02", url="https://polymarket.com"))))
+    cards.post_card(hook, "", cards.politician_card(dict(label="Sen. Test Person (R-XX)", chamber="Senate", filed="Jan 16",
+        trades=[dict(word="BUY", ticker="CVX", amount="$15K–$50K", date="Dec 29", move=0.101, match=True),
+                dict(word="BUY", ticker="RTX", amount="$15K–$50K", date="Dec 29", move=0.095, match=True)],
+        committees=["Armed Services"], delay=18, late=False, match_note="$RTX is in Defense, an area the Armed Services Committee oversees.")))
+    cards.post_card(hook, "", cards.result_card(dict(ticker="TEST", number=1, entry_day="2026-11-05", exit_day="2026-11-12",
+        entry=41.2, exit=43.75, ret=0.062, spy=0.008, excess=0.054, totals=dict(n=14, wins=9, avg=0.022))))
 print("done")

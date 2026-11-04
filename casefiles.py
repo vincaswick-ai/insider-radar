@@ -272,7 +272,7 @@ def maybe_open(webhook, state, buy, info):
     first = events[0]
     n = len(cases) + 1
     drop = buy.get("drop")
-    drop_text = f"<b class='r'>−{drop * 100:.0f}%</b> from its 1-year high" if drop and drop >= 0.05 else "near its 1-year high"
+    drop_text = f"🔴 **−{drop * 100:.0f}%** from its 1-year high" if drop and drop >= 0.05 else "near its 1-year high"
     title = (f"${t} · {info['company_short']}'s {info['role_short']} buys {money(buy['value'])}, "
              f"{(first['date'] - today).days} day{'s' if (first['date'] - today).days != 1 else ''} before {first['short']}")
     summary = (f"{info['name']} bought shares with their own money"
@@ -280,17 +280,17 @@ def maybe_open(webhook, state, buy, info):
                + f", {(first['date'] - today).days} day{'s' if (first['date'] - today).days != 1 else ''} before {first['short']}.")
     timeline = []
     if drop and drop >= 0.15:
-        timeline.append({"when": "Before the buy", "color": "#ed4245",
-                         "text": f"Stock <b class='r'>−{drop * 100:.0f}%</b> from its 1-year high."})
-    stake = ("opening a <b>new position</b>" if buy.get("new_position") else
-             f"stake <b class='g'>+{buy['stake_change']:.0f}%</b>" if buy.get("stake_change") else "")
-    timeline.append({"when": f"{info['filed']} · today", "color": "#57f287",
-                     "text": f"{cards.esc(info['role_short'])} buys <b class='g'>{money(buy['value'])}</b>"
+        timeline.append({"when": "Before the buy", "icon": "🔴",
+                         "text": f"Stock **−{drop * 100:.0f}%** from its 1-year high."})
+    stake = ("opening a **new position**" if buy.get("new_position") else
+             f"stake **+{buy['stake_change']:.0f}%**" if buy.get("stake_change") else "")
+    timeline.append({"when": f"{info['filed']} · today", "icon": "🟢",
+                     "text": f"{info['role_short']} buys **{money(buy['value'])}**"
                              + (f", {stake}" if stake else "")
                              + (f". {info['others_14d']} other insider{'s' if info['others_14d'] != 1 else ''} bought in the last 14 days" if info["others_14d"] else "") + "."})
     for e in events[:4]:
-        timeline.append({"when": f"{e['date']:%b %d} · {_days(e['date'], today)} ⏳", "color": "#fee75c",
-                         "text": f"<b>{cards.esc(e['title'])}.</b> {cards.esc(e.get('why') or '')}"})
+        timeline.append({"when": f"{e['date']:%b %d} · {_days(e['date'], today)} ⏳", "icon": "🟡",
+                         "text": f"**{e['title']}.** {e.get('why') or ''}"})
 
     market = None
     for q in [e.get("poly") for e in events if e.get("poly")] + [info["company_short"]]:
