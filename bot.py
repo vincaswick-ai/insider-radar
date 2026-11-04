@@ -28,6 +28,8 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
+import cards
+import casefiles
 import conviction_live
 from chart import make_chart, make_cluster_chart
 from company import company_info
@@ -413,6 +415,49 @@ def role_text(roles):
     return ", ".join(dict.fromkeys(cleaned))
 
 
+def role_short(roles):
+    """One word for titles: CEO, CFO, President, Chair, COO, Director, major holder, insider."""
+    low = " ".join(roles).lower()
+    for key, word in (("chief executive", "CEO"), ("ceo", "CEO"), ("chief financial", "CFO"), ("cfo", "CFO"),
+                      ("president", "President"), ("chair", "Chair"), ("chief operating", "COO"),
+                      ("director", "director"), ("10%", "major holder")):
+        if key in low:
+            return word
+    return "insider"
+
+
+def company_short(raw):
+    name = nice_company(raw or "")
+    name = re.sub(r"[,.]?\s+(Inc|Corp|Corporation|Co|Company|Ltd|Plc|PLC|LLC|LP|NV|SA|AG|Holdings?|Group|Incorporated)\.?$", "", name, flags=re.I)
+    name = re.sub(r"[,.]?\s+(Inc|Corp|Co|Holdings?)\.?$", "", name, flags=re.I)
+    return name.strip() or raw
+
+
+def meaning_line(buy, rshort, others):
+    who = "A major holder" if rshort == "major holder" else f"The {rshort}" if rshort != "insider" else "An insider"
+    line = f"{who} put {money(buy['value'])} of {'its' if rshort == 'major holder' else 'their'} own money into the stock"
+    sc = buy.get("stake_change")
+    if buy.get("new_position"):
+        line += ", opening a brand-new position"
+    elif sc is not None and sc >= 100:
+        line += f", more than doubling their stake (+{sc:.0f}%)"
+    elif sc is not None and sc >= 10:
+        line += f", growing their stake by {sc:.0f}%"
+    line += "."
+    extra = []
+    d = buy.get("drop")
+    if d is not None and d >= 0.15:
+        extra.append(f"the stock is {d * 100:.0f}% below its 1-year high")
+    if others:
+        extra.append(f"{others} other insider{'s' if others != 1 else ''} bought in the last 14 days")
+    if extra:
+        x = " and ".join(extra)
+        line += " " + x[0].upper() + x[1:] + "."
+    if buy.get("plan_10b5_1"):
+        line += " Pre-planned trade (10b5-1), so it says less."
+    return line
+
+
 def ticker_label(buy):
     """'NYSE: BPRE' when the exchange is known, otherwise just 'BPRE'."""
     ex = buy.get("exchange")
@@ -626,6 +671,7 @@ def run():
     webhook = os.environ.get("WEBHOOK_INSIDER_BUYS", "").strip()
     cluster_webhook = os.environ.get("WEBHOOK_CLUSTER", "").strip()
     conviction_webhook = os.environ.get("WEBHOOK_CONVICTION", "").strip()
+    case_webhook = os.environ.get("WEBHOOK_CASE_FILES", "").strip()
     if not webhook:
         sys.exit("WEBHOOK_INSIDER_BUYS is not set.")
     if not USER_AGENT or "@" not in USER_AGENT:
@@ -700,12 +746,14 @@ def run():
         })
 
         # Strategy #1: Conviction Clusters (judged on every stored buy, never stops the run)
+        conv_hit = False
         if conviction_webhook and not bootstrap:
             try:
                 sig = conviction_live.check(state, buy["ticker"], buy["trade_date"] or today)
                 if sig:
                     buy["drop"] = drop_from_high(rows)
                     conviction_live.post_alert(conviction_webhook, sig, buy)
+                    conv_hit = True
                     log(f"  CONVICTION CLUSTER {buy['ticker']}")
             except Exception as e:
                 log(f"  conviction check skipped: {e}")
@@ -720,39 +768,49 @@ def run():
         if posted >= limit:
             continue
 
-        # Insider Score + the facts behind it (each piece is optional)
+        # facts behind the card (each piece is optional, never stops the run)
         add_score(session, buy, rows, state, name, today)
-        if buy.get("score"):
-            state["buys"][-1]["score"] = buy["score"]     # kept for the future leaderboard / portfolio
-        post_discord(webhook, build_embed(buy, today, filing_url), image)
+        others = other_insiders(state, buy["ticker"], name, buy["trade_date"] or today)
+        rshort = role_short(buy["owner"]["roles"])
+        cshort = company_short(buy["company"])
+        prof = casefiles.profile(session, buy.get("issuer_cik"), buy["company"]) if buy.get("issuer_cik") else {}
+        tags = ["conviction"] if conv_hit else []
+        if case_webhook and not bootstrap:
+            try:
+                if casefiles.maybe_open(case_webhook, state, buy, {
+                        "name": name, "role": role_text(buy["owner"]["roles"]), "role_short": rshort,
+                        "company_short": cshort, "filing_url": filing_url, "exchange": buy.get("exchange"),
+                        "profile": prof, "others_14d": others, "only_big_holder": only_big_holder(buy),
+                        "filed": datetime.fromisoformat(today).strftime("%b %d")}):
+                    tags.append("case")
+            except Exception as e:
+                log(f"  case file skipped: {e}")
+        day_txt = buy["trade_date"]
+        try:
+            day_txt = datetime.fromisoformat(buy["trade_date"]).strftime("%b %d")
+        except (TypeError, ValueError):
+            pass
+        sc = buy.get("stake_change")
+        stake_txt = ("new position" if buy.get("new_position") else f"stake +{sc:.0f}%" if sc is not None and sc >= 1 else "")
+        right = " · ".join(x for x in [cshort, cap_text(buy), "⭐ S&P 500" if buy.get("sp500") else None] if x)
+        card = cards.buy_card({
+            "ticker": buy["ticker"], "exchange": buy.get("exchange"), "industry": prof.get("label") or prof.get("industry"),
+            "company_short": cshort, "role_short": rshort, "name": name, "role": role_text(buy["owner"]["roles"]),
+            "value": buy["value"], "shares": buy["shares"], "price": buy["avg_price"], "date_text": day_txt,
+            "stake_text": stake_txt, "meaning": meaning_line(buy, rshort, others), "footer_right": right, "tags": tags})
+        content = (f"💼 **${buy['ticker']}** · {cshort}'s {rshort} buys {money(buy['value'])}"
+                   + (" · 🔥 CONVICTION" if "conviction" in tags else "") + (" · 🔎 CASE FILE" if "case" in tags else "")
+                   + f" · [SEC filing](<{filing_url}>)")
+        cards.post_card(webhook, content, card)
         posted += 1
         log(f"  posted {buy['ticker']} {name} {money(buy['value'])}")
 
-        # #signals: the strongest buys explained from every angle (never stops the run)
-        signal_posted = False
-        if cluster_webhook and not bootstrap:
-            try:
-                import signal_post
-                in_cluster = other_insiders(state, buy["ticker"], name, buy["trade_date"] or today) >= 2
-                if signal_post.wanted(buy, in_cluster):
-                    buy["owner_label"] = f"{name} ({role_text(buy['owner']['roles'])})"
-                    post_embeds(cluster_webhook, signal_post.build(session, buy, rows, filing_url, in_cluster))
-                    signal_posted = True
-                    log(f"  signal {buy['ticker']}")
-                    import record
-                    record.add(buy["ticker"], buy["company"], name, role_text(buy["owner"]["roles"]),
-                               buy["value"], buy["avg_price"], last_price,
-                               kind="cluster" if in_cluster else "insider",
-                               score=buy.get("score"), url=filing_url)
-            except Exception as e:
-                log(f"  signal skipped: {e}")
-
-        if cluster_webhook and not bootstrap:
-            cluster = find_cluster(state, buy["ticker"], buy["trade_date"] or today)
-            if cluster and not signal_posted:      # the signal post already covers the cluster
-                cluster_img = make_cluster_chart(buy["ticker"], cluster, buy.get("exchange"))
-                post_discord(cluster_webhook, build_cluster_embed(buy["ticker"], buy["company"], cluster, buy.get("exchange"), buy), cluster_img)
-                log(f"  cluster alert {buy['ticker']}")
+    # Case Files: post a result for every case whose event has passed
+    if case_webhook and not bootstrap:
+        try:
+            casefiles.update_cases(case_webhook, state)
+        except Exception as e:
+            log(f"  case updates skipped: {e}")
 
     if newest_time is not None:
         state["last_feed_time"] = newest_time.isoformat()

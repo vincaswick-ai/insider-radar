@@ -188,27 +188,28 @@ def post_alert(webhook, sig, buy):
         lines.append(f"• **{p['name']}** ({p['role'] or 'Insider'}) — {money(p['value'])}{stake}{link}")
     if len(sig["insiders"]) > 6:
         lines.append(f"• …and {len(sig['insiders']) - 6} more")
-    why = []
-    if sig["total"] >= BIG_TOTAL:
-        why.append(f"they bet **{money(sig['total'])}** together")
-    if sig["median_stake"] is not None and sig["median_stake"] >= DOUBLED:
-        why.append("the typical insider **at least doubled** their stake")
-    drop = buy.get("drop")
-    facts = [liq_label(dv)]
-    if drop is not None:
-        facts.append(f"📉 {drop * 100:.0f}% below its 1-year high")
-    exch = f" ({buy['exchange']})" if buy.get("exchange") else ""
-    embed = {
-        "title": f"🎯 CONVICTION CLUSTER — ${sig['ticker']}",
-        "color": COLOR,
-        "description": (
-            f"**{len(sig['insiders'])} insiders of {buy.get('company', sig['ticker'])}{exch}** bought their own stock "
-            f"within 7 days, and " + " and ".join(why) + ".\n\n" + "\n".join(lines) + "\n\n" + " · ".join(facts) +
-            f"\n\n📋 **Strategy:** buy at the next open ({entry_day:%a %b %d}) · ⏰ sell reminder on {sell_day:%a %b %d}\n"
-            "Backtest 2006–2026: avg +1.5% vs S&P in 5 days, about half of signals win. How it works → <#1567258289979396206>"),
-        "footer": {"text": "Insider Radar · Conviction Clusters · Source: SEC Form 4 · Not financial advice"},
-    }
-    post(webhook, embed)
+    import cards
+    data0 = load_log()
+    number = len(data0["signals"]) + 1
+    t = totals(data0["signals"])
+    days = 1
+    try:
+        ds = sorted(p["date"] for p in sig["insiders"] if p.get("date"))
+        days = max(1, (datetime.fromisoformat(ds[-1]) - datetime.fromisoformat(ds[0])).days + 1)
+    except Exception:
+        pass
+    insiders = []
+    for p in sig["insiders"]:
+        st_txt = "" if p["stake"] is None else ("new position" if p["stake"] >= NEW_POSITION else f"+{p['stake'] * 100:.0f}%")
+        insiders.append({"name": p["name"], "role": p["role"] or "Insider", "value": p["value"], "stake_text": st_txt})
+    card = cards.conviction_card({"ticker": sig["ticker"], "company": buy.get("company") or "", "n": len(sig["insiders"]),
+                                  "total": sig["total"], "days": days, "insiders": insiders, "number": number,
+                                  "entry": f"{entry_day:%b %d}", "exit": f"{sell_day:%b %d}",
+                                  "stats": ({"n": t["n"], "wins": t["wins"], "avg": t["avg"]} if t else None)})
+    links = " · ".join(f"[filing {i + 1}](<{p['url']}>)" for i, p in enumerate(sig["insiders"][:4]) if p.get("url"))
+    content = (f"🔥 **CONVICTION SIGNAL #{number:03d} · ${sig['ticker']}** · {len(sig['insiders'])} insiders, "
+               f"{money(sig['total'])} · entry {entry_day:%a %b %d}" + (f" · {links}" if links else ""))
+    cards.post_card(webhook, content, card)
     data = load_log()
     data["signals"].append({"ticker": sig["ticker"], "company": buy.get("company"), "day": sig["day"],
                             "alerted": date.today().isoformat(), "entry_day": entry_day.isoformat(),
@@ -277,23 +278,22 @@ def run():
                 t = totals(data["signals"])
                 mark = "✅ beat the market" if s["excess"] > 0 else "❌ lagged the market"
                 if record_hook:
-                    post(record_hook, content=(
-                        f"**${s['ticker']}** — bought {s['entry_day']} at ${s['entry']:,.2f}, sold {s['exit_day']} at "
-                        f"${s['exit']:,.2f}\nStock **{s['ret'] * 100:+.2f}%** vs S&P {s['spy'] * 100:+.2f}% → "
-                        f"{mark} by **{s['excess'] * 100:+.2f}%**\n{totals_line(t)}"))
+                    import cards
+                    num = data["signals"].index(s) + 1
+                    cards.post_card(record_hook, f"📊 **${s['ticker']}** · Conviction #{num:03d} closed: "
+                                    f"{s['ret'] * 100:+.1f}% vs S&P {s['spy'] * 100:+.1f}% · {mark}",
+                                    cards.result_card({"ticker": s["ticker"], "number": num, "entry_day": s["entry_day"],
+                                                       "exit_day": s["exit_day"], "entry": s["entry"], "exit": s["exit"],
+                                                       "ret": s["ret"], "spy": s["spy"], "excess": s["excess"], "totals": t}))
         if today.weekday() == 4 and record_hook and data.get("last_weekly") != today.isoformat():
             t = totals(data["signals"])
             open_n = sum(s["status"] == "open" for s in data["signals"])
             week = [s for s in data["signals"] if s.get("status") == "closed"
                     and s["exit_day"] >= (today - timedelta(days=6)).isoformat()]
-            body = ["📊 **Weekly update — Conviction Clusters**"]
-            if week:
-                body += [f"This week: " + ", ".join(f"${s['ticker']} {s['excess'] * 100:+.1f}%" for s in week)]
-            else:
-                body += ["No signals closed this week."]
-            body += [totals_line(t) if t else "No closed signals yet — the live test just started.",
-                     f"Open signals: {open_n}", "Backtest expectation: about +1.5% vs S&P per signal, ~50% win rate."]
-            post(record_hook, content="\n".join(body))
+            import cards
+            cards.post_card(record_hook, "📊 **Weekly update · Conviction Clusters**",
+                            cards.weekly_card({"week": [(x["ticker"], x["excess"]) for x in week],
+                                               "totals": t, "open_n": open_n}))
             data["last_weekly"] = today.isoformat()
             changed = True
 

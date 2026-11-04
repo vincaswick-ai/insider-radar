@@ -479,6 +479,39 @@ def build_embed(filing, label, trades, prices, committees=None, sic=None):
     }
 
 
+def build_card(filing, label, trades, prices, committees=None, sic=None):
+    """(content line, card html) for the new card format."""
+    import cards
+    trades = merge_same(trades)
+    sic = sic or {}
+    for t in trades:
+        t["match"] = (committee_match((sic.get(t["ticker"]) or [None])[0], committees)
+                      if t["type"] == "P" else None)
+    trades = sorted(trades, key=lambda t: (t["match"] is None, t["type"] != "P", -amount_top(t["amount"])))
+    rows = []
+    for t in trades:
+        word = "BUY" if t["type"] == "P" else "SELL" if t["type"].startswith("S") else "SWAP"
+        rows.append({"word": word, "ticker": t["ticker"] + (" (options)" if t["option"] else ""),
+                     "amount": compact_amount(t["amount"]), "date": f"{t['date']:%b %d}" if t["date"] else "",
+                     "move": since_trade(t["ticker"], t["date"], prices), "match": t["match"]})
+    note = ""
+    for t in trades:
+        if t["match"]:
+            comm, sector = t["match"]
+            note = f"${t['ticker']} is in {sector}, an area the {comm} Committee oversees."
+            break
+    dated = [t["date"] for t in trades if t["date"]]
+    delay = (filing["filed"] - min(dated)).days if dated and filing["filed"] else None
+    card = cards.politician_card({"label": label, "chamber": filing["chamber"],
+                                  "filed": f"{filing['filed']:%b %d}" if filing["filed"] else "",
+                                  "trades": rows, "committees": (committees or [])[:3], "delay": delay,
+                                  "late": delay is not None and delay > 45, "match_note": note})
+    tks = ", ".join(dict.fromkeys(f"${r['ticker']}" for r in rows[:4]))
+    content = (f"🏛 **{label}** · {filing['chamber']} · {tks}" + (" · ⚠️ committee match" if note else "")
+               + f" · [Disclosure](<{filing['url']}>)")
+    return content, card
+
+
 def paper_embed(filing, label):
     return {
         "title": f"🏛️ {label} · {filing['chamber']}",
@@ -645,7 +678,9 @@ def run():
                 post(os.environ["WEBHOOK_PROOF"], embed)
                 log("  posted to the test channel")
         else:
-            post(webhook, embed)
+            import cards
+            content, card = build_card(f, label, trades, prices, comms.get(member_id(legis, f["last"], f["state"])), sic)
+            cards.post_card(webhook, content, card)
             log(f"  posted {label} ({len(trades or [])} trades)")
         deep_hook = (os.environ.get("WEBHOOK_PROOF") if DEBUG and TEST_ID else os.environ.get("WEBHOOK_DEEPDIVE")) or ""
         if deep_hook.strip() and not bootstrap and trades:

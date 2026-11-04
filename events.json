@@ -1,0 +1,15 @@
+{
+  "_how": "Known future events the Case Files radar connects to insider buys. date = the day the result is known. sectors = keys from casefiles.py (banks, realestate, insurance, oil, defense, biotech, health, semis, software, solar, autos, utilities, mining, airlines, retail). tickers = optional exact tickers. polymarket_q = search text for live odds.",
+  "events": [
+    {
+      "date": "2026-12-09",
+      "title": "Fed interest-rate decision",
+      "short": "the Fed's rate decision",
+      "sectors": ["banks", "realestate", "insurance"],
+      "why": "Rate decisions move bank margins, mortgage demand and real-estate values.",
+      "scenarios": [["If the Fed cuts rates", "Cheaper money tends to help real estate and lending volumes."],
+                    ["If the Fed holds or hikes", "Pressure on property values; banks keep wider margins."]],
+      "polymarket_q": "Fed decision in December"
+    }
+  ]
+}
