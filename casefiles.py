@@ -117,7 +117,7 @@ def _earnings_calendar(days):
         if day.weekday() >= 5:
             continue
         try:
-            r = s.get(f"https://api.nasdaq.com/api/calendar/earnings?date={day.isoformat()}", timeout=20)
+            r = s.get(f"https://api.nasdaq.com/api/calendar/earnings?date={day.isoformat()}", timeout=10)
             rows = ((r.json().get("data") or {}).get("rows")) or []
             for row in rows:
                 sym = (row.get("symbol") or "").upper().strip()
@@ -129,28 +129,24 @@ def _earnings_calendar(days):
 
 
 def _fda_calendar():
-    """{TICKER: [{'date': iso, 'drug': str}]} parsed from RTTNews' FDA calendar."""
+    """{TICKER: [{'date': iso, 'drug': str}]} parsed from RTTNews' FDA calendar (div.grid-row blocks)."""
     out = {}
     try:
         r = requests.get("https://www.rttnews.com/corpinfo/fdacalendar.aspx",
                          headers={"User-Agent": BROWSER_UA}, timeout=30)
-        text = re.sub(r"<script.*?</script>|<style.*?</style>", " ", r.text, flags=re.S | re.I)
-        rows = re.split(r"<tr[ >]", text, flags=re.I)
-        for row in rows:
-            cells = [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", c)).strip()
-                     for c in re.split(r"</t[dh]>", row, flags=re.I)]
-            joined = " | ".join(c for c in cells if c)
-            m_date = re.search(r"\b(\d{1,2})/(\d{1,2})/(20\d\d)\b", joined)
-            m_tick = re.search(r"\(([A-Z]{1,5})\)|\b(?:NASDAQ|NYSE|AMEX)\s*:\s*([A-Z]{1,5})\b", joined)
-            if not (m_date and m_tick):
+        for block in r.text.split('class="grid-row')[1:]:
+            cells = {}
+            for k, v in re.findall(r'data-th="([^"]+)"[^>]*>(.*?)</div>', block, flags=re.S):
+                cells[k] = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", v)).strip()
+            m_t = re.search(r"\(\s*([A-Z]{1,5})\s*[,)]", cells.get("Company Name", ""))
+            m_d = re.search(r"\b(\d{1,2})/(\d{1,2})/(20\d\d)\b", cells.get("Event", ""))
+            if not (m_t and m_d):
                 continue
             try:
-                d = date(int(m_date.group(3)), int(m_date.group(1)), int(m_date.group(2)))
+                d = date(int(m_d.group(3)), int(m_d.group(1)), int(m_d.group(2)))
             except ValueError:
                 continue
-            tk = m_tick.group(1) or m_tick.group(2)
-            drug = next((c for c in cells if re.search(r"\b(NDA|BLA|sNDA|sBLA|PDUFA)\b", c)), "")
-            out.setdefault(tk, []).append({"date": d.isoformat(), "drug": drug[:80]})
+            out.setdefault(m_t.group(1), []).append({"date": d.isoformat(), "drug": cells.get("Drug", "")[:60]})
     except Exception as e:
         log(f"  FDA calendar unavailable: {e}")
     return out
@@ -178,7 +174,8 @@ def load_events():
 # ---------------------------------------------------------------- Polymarket
 
 def polymarket(query):
-    """Best active market for the query: {'question','yes_label','yes','no_label','no','url'} or None."""
+    """Most-traded active event for the query, shown by its most likely outcome:
+    {'question','yes_label','yes','no_label','no','url'} or None."""
     try:
         r = requests.get("https://gamma-api.polymarket.com/public-search",
                          params={"q": query, "limit_per_type": 8, "events_status": "active"},
@@ -187,6 +184,7 @@ def polymarket(query):
         for ev in (r.json().get("events") or []):
             if ev.get("closed"):
                 continue
+            top, vol = None, 0.0
             for m in ev.get("markets") or []:
                 if m.get("closed") or not m.get("active", True):
                     continue
@@ -197,14 +195,14 @@ def polymarket(query):
                     continue
                 if len(outs) != 2 or len(prices) != 2:
                     continue
-                vol = float(m.get("volume") or 0)
-                if vol < 5000:
-                    continue
-                if not best or vol > best[0]:
-                    best = (vol, {"question": m.get("question") or ev.get("title"),
-                                  "yes_label": str(outs[0]).upper(), "yes": prices[0],
-                                  "no_label": str(outs[1]).upper(), "no": prices[1],
-                                  "url": f"https://polymarket.com/event/{ev.get('slug')}"})
+                vol += float(m.get("volume") or 0)
+                if not top or prices[0] > top["yes"]:
+                    top = {"question": m.get("question") or ev.get("title"),
+                           "yes_label": str(outs[0]).upper(), "yes": prices[0],
+                           "no_label": str(outs[1]).upper(), "no": prices[1],
+                           "url": f"https://polymarket.com/event/{ev.get('slug')}"}
+            if top and vol >= 5000 and (not best or vol > best[0]):
+                best = (vol, top)
         return best[1] if best else None
     except Exception as e:
         log(f"  polymarket '{query}': {e}")
