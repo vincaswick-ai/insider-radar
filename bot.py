@@ -797,7 +797,10 @@ def run():
             "ticker": buy["ticker"], "exchange": buy.get("exchange"), "industry": prof.get("label") or prof.get("industry"),
             "company_short": cshort, "role_short": rshort, "name": name, "role": role_text(buy["owner"]["roles"]),
             "value": buy["value"], "shares": buy["shares"], "price": buy["avg_price"], "date_text": day_txt,
-            "stake_text": stake_txt, "meaning": meaning_line(buy, rshort, others), "footer_right": right, "tags": tags})
+            "stake_text": stake_txt, "meaning": meaning_line(buy, rshort, others), "footer_right": right, "tags": tags,
+            "stake_change": buy.get("stake_change"), "new_position": buy.get("new_position"),
+            "owned_after": buy.get("owned_after"), "drop": buy.get("drop"), "others": others,
+            "plan": buy.get("plan_10b5_1")})
         content = (f"💼 **${buy['ticker']}** · {cshort}'s {rshort} buys {money(buy['value'])}"
                    + (" · 🔥 CONVICTION" if "conviction" in tags else "") + (" · 🔎 CASE FILE" if "case" in tags else "")
                    + f" · [SEC filing](<{filing_url}>)")

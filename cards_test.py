@@ -14,7 +14,8 @@ if hook:
     cards.post_card(hook, "🧪 **Card test** · insider buy", cards.buy_card(dict(
         ticker="TFC", exchange="NYSE", industry="Banks", company_short="Truist Financial", role_short="CEO",
         name="Michael P. Lyons", role="President & CEO", value=1209050, shares=25000, price=48.36, date_text="Oct 28",
-        stake_text="", meaning="The CEO put $1.2M of their own money into the stock.", footer_right="Truist Financial · ⭐ S&P 500", tags=[])))
+        stake_text="", meaning="", footer_right="Truist Financial · ⭐ S&P 500", tags=[],
+        stake_change=12.4, new_position=False, owned_after=226000, drop=0.22, others=1, plan=False)))
     cards.post_card(hook, "🧪 **Card test** · conviction", cards.conviction_card(dict(
         ticker="TEST", company="Test Corp", n=3, total=6.4e6, days=5, number=1, entry="Nov 05", exit="Nov 12", stats=None,
         insiders=[dict(name="Jane Doe", role="CEO", value=3.1e6, stake_text="+48%"), dict(name="John Roe", role="CFO", value=1.9e6, stake_text="+120%"),

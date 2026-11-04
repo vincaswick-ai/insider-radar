@@ -88,20 +88,39 @@ def _tags(tags):
 # ---------------------------------------------------------------- 1. insider buy (#all-buys)
 
 def buy_card(d):
+    """Facts only: who, how much, how big the stake change is, how far the stock is from its high."""
     head = " · ".join(x for x in ["💼 INSIDER BUY", (d.get("industry") or "").upper(), d.get("exchange")] if x)
     tags = _tags(d.get("tags"))
     who_short = d.get("role_short") or "insider"
+    sc, owned, price = d.get("stake_change"), d.get("owned_after"), d["price"]
+    if d.get("new_position"):
+        stake = "🆕 **New position**\nfirst shares they own"
+    elif sc is not None:
+        stake = f"📈 **+{sc:.0f}%**" + (" · more than doubled" if sc >= 100 else "") + "\nvs. shares held before"
+    else:
+        stake = "—"
+    owns = f"{owned:,.0f} sh\n≈ {money(owned * price)}" if owned else "—"
+    drop = d.get("drop")
+    high = ("—" if drop is None else "at its 1-year high" if drop < 0.02 else f"🔻 **−{drop * 100:.0f}%**\nbelow its 1-year high")
+    fields = [
+        f("Who", f"{d['name']}\n*{d.get('role') or ''}*"),
+        f("Amount", f"**${d['value']:,.0f}**\n{d['shares']:,.0f} sh @ ${price:,.2f}"),
+        f("Bought", f"{d.get('date_text') or ''}\nopen market · own money"),
+        f("Stake change", stake), f("Now owns", owns), f("Stock price", high),
+    ]
+    notes = []
+    if d.get("others"):
+        notes.append(f"👥 {d['others']} other insider{'s' if d['others'] != 1 else ''} bought this stock in the last 14 days")
+    if d.get("plan"):
+        notes.append("🗓 Pre-planned trade (Rule 10b5-1)")
+    if notes:
+        fields.append(f("\u200b", "\n".join(notes), False))
     return {
         "color": BLUE,
         "author": {"name": head + (f"  ·  {tags}" if tags else "")},
         "title": f"${d['ticker']} · {d['company_short']}'s {who_short} buys {money(d['value'])} of stock",
-        "fields": [
-            f("Who", f"{d['name']}\n*{d.get('role') or ''}*"),
-            f("Amount", f"**${d['value']:,.0f}**\n{d['shares']:,.0f} sh @ ${d['price']:,.2f}"),
-            f("Bought", f"{d.get('date_text') or ''} · own money" + (f"\n{d['stake_text']}" if d.get("stake_text") else "")),
-            f("💡 What this means", d["meaning"], False),
-        ],
-        "footer": {"text": f"Insider Radar · Source: SEC Form 4 · Not financial advice"
+        "fields": fields,
+        "footer": {"text": "Insider Radar · Source: SEC Form 4 · Not financial advice"
                            + (f"  |  {d['footer_right']}" if d.get("footer_right") else "")},
     }
 
