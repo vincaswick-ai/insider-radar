@@ -15,7 +15,10 @@
   "H20035743",
   "H20035484",
   "H20035751",
-  "H20035763"
+  "H20035763",
+  "H20035765",
+  "H20035662",
+  "H20035778"
  ],
  "trades": [
   {
@@ -235,6 +238,66 @@
    "filed": "2026-11-03",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035763.pdf",
    "match": null
+  },
+  {
+   "who": "Daniel Meuser (R-PA)",
+   "ticker": "NVDA",
+   "type": "S (partial)",
+   "date": "2026-09-25",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-05",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035662.pdf",
+   "match": null
+  },
+  {
+   "who": "Maria Elvira Salazar (R-FL)",
+   "ticker": "CSCO",
+   "type": "S",
+   "date": "2026-10-23",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-05",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035778.pdf",
+   "match": null
+  },
+  {
+   "who": "Maria Elvira Salazar (R-FL)",
+   "ticker": "NVDA",
+   "type": "P",
+   "date": "2026-10-23",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-05",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035778.pdf",
+   "match": null
+  },
+  {
+   "who": "Maria Elvira Salazar (R-FL)",
+   "ticker": "NVDA",
+   "type": "P",
+   "date": "2026-10-23",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-05",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035778.pdf",
+   "match": null
+  },
+  {
+   "who": "Maria Elvira Salazar (R-FL)",
+   "ticker": "PG",
+   "type": "P",
+   "date": "2026-10-23",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-05",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035778.pdf",
+   "match": null
+  },
+  {
+   "who": "Maria Elvira Salazar (R-FL)",
+   "ticker": "PG",
+   "type": "P",
+   "date": "2026-10-23",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-05",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035778.pdf",
+   "match": null
   }
  ],
  "sic": {
@@ -273,6 +336,18 @@
   "FMAO": [
    6035,
    "Savings Institution, Federally Chartered"
+  ],
+  "NVDA": [
+   3674,
+   "Semiconductors & Related Devices"
+  ],
+  "PG": [
+   2840,
+   "Soap, Detergents, Cleang Preparations, Perfumes, Cosmetics"
+  ],
+  "CSCO": [
+   3576,
+   "Computer Communications Equipment"
   ]
  }
 }
