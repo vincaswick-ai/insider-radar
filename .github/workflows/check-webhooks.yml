@@ -1,0 +1,26 @@
+name: Check webhooks
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Which channel does each webhook post to
+        env:
+          WEBHOOK_INSIDER_BUYS: ${{ secrets.WEBHOOK_INSIDER_BUYS }}
+          WEBHOOK_BIG_CAPS: ${{ secrets.WEBHOOK_BIG_CAPS }}
+          WEBHOOK_CLUSTERS: ${{ secrets.WEBHOOK_CLUSTERS }}
+          WEBHOOK_CASE_FILES: ${{ secrets.WEBHOOK_CASE_FILES }}
+          WEBHOOK_POLITICIANS: ${{ secrets.WEBHOOK_POLITICIANS }}
+          WEBHOOK_INVESTORS: ${{ secrets.WEBHOOK_INVESTORS }}
+          WEBHOOK_CONVICTION: ${{ secrets.WEBHOOK_CONVICTION }}
+          WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
+        run: python check_webhooks.py
