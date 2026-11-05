@@ -84,6 +84,7 @@ def holdings(session, cik, acc):
             continue
         text = re.sub(r'\sxmlns(:\w+)?="[^"]+"', "", text)
         text = re.sub(r"<(/?)\w+:", r"<\1", text)
+        text = re.sub(r'\s\w+:\w+="[^"]*"', "", text)       # prefixed attributes (xsi:schemaLocation...)
         root = ET.fromstring(text.encode())
         out = {}
         for it in root.iter("infoTable"):
@@ -108,13 +109,18 @@ def quarter(period):
     return f"Q{(d.month - 1) // 3 + 1} {d.year}"
 
 
+def share(v, total):
+    p = v / total * 100
+    return "<0.1%" if p < 0.1 else f"{p:.1f}%"
+
+
 def diff(now, before):
     total = sum(h["value"] for h in now.values()) or 1
     new, added, cut, sold = [], [], [], []
     for c, h in now.items():
         p = before.get(c)
         if not p:
-            new.append((c, h["value"], f"{h['value'] / total * 100:.1f}% of portfolio"))
+            new.append((c, h["value"], f"{share(h['value'], total)} of portfolio"))
         elif p["shares"] and h["shares"] >= p["shares"] * (1 + BIG_MOVE):
             added.append((c, h["value"], f"{(h['shares'] / p['shares'] - 1) * 100:.0f}% shares"))
         elif p["shares"] and h["shares"] <= p["shares"] * (1 - BIG_MOVE):
@@ -123,7 +129,7 @@ def diff(now, before):
         if c not in now:
             sold.append((c, p["value"], ""))
     key = lambda x: -x[1]
-    top = sorted(((c, h["value"], f"{h['value'] / total * 100:.1f}%") for c, h in now.items()), key=key)[:8]
+    top = sorted(((c, h["value"], share(h["value"], total)) for c, h in now.items()), key=key)[:8]
     return total, sorted(new, key=key), sorted(added, key=key), sorted(cut, key=key), sorted(sold, key=key), top
 
 
