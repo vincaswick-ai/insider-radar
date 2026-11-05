@@ -12,8 +12,10 @@ What it does on every run:
 
 Configuration (environment variables / GitHub secrets):
   WEBHOOK_INSIDER_BUYS  (required) Discord webhook URL for insider buys
-  WEBHOOK_CLUSTER       (optional) Discord webhook URL for cluster alerts
-  WEBHOOK_CONVICTION    (optional) Discord webhook URL for #conviction-alerts (Strategy #1)
+  WEBHOOK_CLUSTERS      (optional) #clusters: 3+ insiders of one company within 14 days
+  WEBHOOK_BIG_CAPS      (optional) #big-caps: buys in S&P 500 or $10B+ companies
+  WEBHOOK_CONVICTION    (optional) #clusters-strategy (Strategy #1)
+  WEBHOOK_CASE_FILES    (optional) #buys-before-events
   SEC_USER_AGENT        (required by SEC) e.g. "InsiderRadar yourname@example.com"
   MIN_VALUE             (optional) minimum buy size in USD, default 50000
 """
@@ -31,7 +33,7 @@ import requests
 import cards
 import casefiles
 import conviction_live
-from chart import make_chart, make_cluster_chart
+from chart import fetch_prices, make_weekly
 from company import company_info
 from score import drop_from_high, insider_score, score_bar, short_interest, track_record
 
@@ -58,6 +60,7 @@ SKIP_OTC = os.environ.get("SKIP_OTC", "1") != "0"
 MAX_POSTS_PER_RUN = 15         # safety cap so a backlog never spams the channel
 BOOTSTRAP_POSTS = 3            # on the very first run, post only a few examples
 CLUSTER_WINDOW_DAYS = 14
+BIG_CAP_MIN = 10e9             # #big-caps: S&P 500 member or market cap of at least $10B
 CLUSTER_MIN_INSIDERS = 3
 CONVICTION_MIN_EACH = conviction_live.MIN_EACH   # buys this small are stored (not posted) for Conviction Clusters
 KEEP_SEEN = 6000
@@ -667,9 +670,44 @@ def add_score(session, buy, rows, state, name, today):
 
 # ---------------------------------------------------------------- main
 
+def big_cap(buy):
+    return bool(buy.get("sp500") or (buy.get("market_cap") or 0) >= BIG_CAP_MIN)
+
+
+def day_text(iso):
+    try:
+        return datetime.fromisoformat(iso).strftime("%b %d")
+    except (TypeError, ValueError):
+        return iso or ""
+
+
+def post_cluster(webhook, cl, buy, rows, prof):
+    """#clusters: who bought, total, weekly chart with every buy marked."""
+    total = sum(b["value"] for b in cl)
+    ds = sorted(b["date"] for b in cl)
+    days = max(1, (datetime.fromisoformat(ds[-1]) - datetime.fromisoformat(ds[0])).days + 1)
+    people = []
+    for b in sorted(cl, key=lambda b: -b["value"]):
+        s = b.get("stake")
+        st = "" if s is None else ("new position" if s >= conviction_live.NEW_POSITION else f"stake +{s * 100:.0f}%")
+        people.append({"name": b["name"], "role": b.get("role"), "value": b["value"], "date": day_text(b["date"]),
+                       "stake_text": st})
+    prices = [b["price"] for b in cl if b.get("price")]
+    card = cards.cluster_card({
+        "ticker": buy["ticker"], "exchange": buy.get("exchange"), "sp500": buy.get("sp500"),
+        "company": nice_company(buy["company"]), "insiders": people, "total": total, "days": days,
+        "avg_price": sum(prices) / len(prices) if prices else None, "drop": buy.get("drop"),
+        "market_cap": buy.get("market_cap"), "size": buy.get("size"), "industry": prof.get("label")})
+    image = make_weekly(buy["ticker"], rows, [{"date": b["date"], "price": b.get("price")} for b in cl], buy.get("exchange"))
+    links = " · ".join(f"[filing {i + 1}](<{b['url']}>)" for i, b in enumerate(cl[:5]) if b.get("url"))
+    cards.post_card(webhook, f"👥 **${buy['ticker']}** · {len(cl)} insiders · {money(total)}" + (f" · {links}" if links else ""),
+                    card, image=image)
+
+
 def run():
     webhook = os.environ.get("WEBHOOK_INSIDER_BUYS", "").strip()
-    cluster_webhook = os.environ.get("WEBHOOK_CLUSTER", "").strip()
+    cluster_webhook = (os.environ.get("WEBHOOK_CLUSTERS", "") or os.environ.get("WEBHOOK_CLUSTER", "")).strip()
+    bigcap_webhook = os.environ.get("WEBHOOK_BIG_CAPS", "").strip()
     conviction_webhook = os.environ.get("WEBHOOK_CONVICTION", "").strip()
     case_webhook = os.environ.get("WEBHOOK_CASE_FILES", "").strip()
     if not webhook:
@@ -711,8 +749,13 @@ def run():
             continue
         buys_found += 1
 
-        # price chart + which exchange the stock trades on
-        image, buy["exchange"], last_price, rows = make_chart(buy["ticker"], buy["trade_date"], buy["trade_date_end"], buy["avg_price"])
+        # prices (5y daily) + which exchange the stock trades on
+        try:
+            rows, buy["exchange"] = fetch_prices(buy["ticker"], "5y")
+        except Exception as e:
+            log(f"  prices unavailable for {buy['ticker']}: {e}")
+            rows, buy["exchange"] = [], None
+        last_price = rows[-1][4] if rows else None
         name = nice_name(buy["owner"]["name"])
         if SKIP_OTC and buy["exchange"] and buy["exchange"] not in ALLOWED_EXCHANGES:
             log(f"  skip {buy['ticker']} {name} {money(buy['value'])}: listed on {buy['exchange']}")
@@ -735,33 +778,51 @@ def run():
             continue
         # market cap + S&P 500 tag
         buy.update(company_info(session, buy.get("issuer_cik"), buy["ticker"], last_price))
+        buy["drop"] = drop_from_high(rows)
 
         filing_url = readable_filing_url(session, base, accession)
         state["buys"].append({
             "ticker": buy["ticker"], "company": buy["company"], "name": name,
             "role": role_text(buy["owner"]["roles"]), "value": round(buy["value"], 2),
-            "date": buy["trade_date"] or today, "accession": accession, "url": filing_url,
+            "date": day, "accession": accession, "url": filing_url,
             "price": round(buy["avg_price"], 4), "filed": today,
             "stake": conviction_live.stake_of(buy),
         })
+        tags = []
+        prof = {}
+        if buy.get("issuer_cik"):
+            prof = casefiles.profile(session, buy.get("issuer_cik"), buy["company"])
 
-        # Strategy #1: Conviction Clusters (judged on every stored buy, never stops the run)
-        conv_hit = False
+        # Strategy #1: Clusters Strategy (judged on every stored buy, never stops the run)
         if conviction_webhook and not bootstrap:
             try:
-                sig = conviction_live.check(state, buy["ticker"], buy["trade_date"] or today)
+                sig = conviction_live.check(state, buy["ticker"], day)
                 if sig:
-                    buy["drop"] = drop_from_high(rows)
-                    conviction_live.post_alert(conviction_webhook, sig, buy)
-                    conv_hit = True
-                    log(f"  CONVICTION CLUSTER {buy['ticker']}")
+                    img = make_weekly(buy["ticker"], rows, [{"date": p["date"], "price": p.get("price")} for p in sig["insiders"]],
+                                      buy.get("exchange"))
+                    conviction_live.post_alert(conviction_webhook, sig, buy, image=img)
+                    tags.append("conviction")
+                    log(f"  CLUSTERS STRATEGY {buy['ticker']}")
             except Exception as e:
                 log(f"  conviction check skipped: {e}")
 
         if buy["value"] < MIN_VALUE:        # small buys are only stored for cluster detection
             continue
+
+        # #clusters: 3+ different insiders within 14 days
+        if cluster_webhook and not bootstrap:
+            try:
+                cl = find_cluster(state, buy["ticker"], day)
+                if cl:
+                    post_cluster(cluster_webhook, cl, buy, rows, prof)
+                    tags.append("cluster")
+                    log(f"  CLUSTER {buy['ticker']} ({len(cl)} insiders)")
+            except Exception as e:
+                log(f"  cluster post skipped: {e}")
+
         sc = buy.get("stake_change")
-        if only_big_holder(buy) and not buy.get("new_position") and (sc is None or sc < 5):
+        big_holder = only_big_holder(buy)
+        if big_holder and not buy.get("new_position") and (sc is None or sc < 5):
             log(f"  not posted {buy['ticker']} {name}: big holder adding {sc or 0:.1f}%")
             continue
 
@@ -770,45 +831,44 @@ def run():
 
         # facts behind the card (each piece is optional, never stops the run)
         add_score(session, buy, rows, state, name, today)
-        others = other_insiders(state, buy["ticker"], name, buy["trade_date"] or today)
+        others = other_insiders(state, buy["ticker"], name, day)
         rshort = role_short(buy["owner"]["roles"])
         cshort = company_short(buy["company"])
-        prof = casefiles.profile(session, buy.get("issuer_cik"), buy["company"]) if buy.get("issuer_cik") else {}
-        tags = ["conviction"] if conv_hit else []
+        data = {
+            "ticker": buy["ticker"], "exchange": buy.get("exchange"), "sp500": buy.get("sp500"),
+            "company": nice_company(buy["company"]), "name": name, "role": role_text(buy["owner"]["roles"]),
+            "value": buy["value"], "shares": buy["shares"], "price": buy["avg_price"], "date_text": day_text(day),
+            "stake_change": buy.get("stake_change"), "new_position": buy.get("new_position"),
+            "owned_after": buy.get("owned_after"), "drop": buy.get("drop"), "market_cap": buy.get("market_cap"),
+            "size": buy.get("size"), "record": buy.get("record"), "others": others, "plan": buy.get("plan_10b5_1"),
+            "industry": prof.get("label") or prof.get("industry"), "big_holder": big_holder}
+        image = make_weekly(buy["ticker"], rows, [{"date": day, "price": buy["avg_price"]}], buy.get("exchange"))
+
         if case_webhook and not bootstrap:
             try:
                 if casefiles.maybe_open(case_webhook, state, buy, {
-                        "name": name, "role": role_text(buy["owner"]["roles"]), "role_short": rshort,
-                        "company_short": cshort, "filing_url": filing_url, "exchange": buy.get("exchange"),
-                        "profile": prof, "others_14d": others, "only_big_holder": only_big_holder(buy),
-                        "filed": datetime.fromisoformat(today).strftime("%b %d")}):
-                    tags.append("case")
+                        "name": name, "role_short": rshort, "company_short": cshort, "filing_url": filing_url,
+                        "profile": prof, "others_14d": others, "only_big_holder": big_holder,
+                        "card": data, "image": image}):
+                    tags.append("event")
             except Exception as e:
                 log(f"  case file skipped: {e}")
-        day_txt = buy["trade_date"]
-        try:
-            day_txt = datetime.fromisoformat(buy["trade_date"]).strftime("%b %d")
-        except (TypeError, ValueError):
-            pass
-        sc = buy.get("stake_change")
-        stake_txt = ("new position" if buy.get("new_position") else f"stake +{sc:.0f}%" if sc is not None and sc >= 1 else "")
-        right = " · ".join(x for x in [cshort, cap_text(buy), "⭐ S&P 500" if buy.get("sp500") else None] if x)
-        card = cards.buy_card({
-            "ticker": buy["ticker"], "exchange": buy.get("exchange"), "industry": prof.get("label") or prof.get("industry"),
-            "company_short": cshort, "role_short": rshort, "name": name, "role": role_text(buy["owner"]["roles"]),
-            "value": buy["value"], "shares": buy["shares"], "price": buy["avg_price"], "date_text": day_txt,
-            "stake_text": stake_txt, "meaning": meaning_line(buy, rshort, others), "footer_right": right, "tags": tags,
-            "stake_change": buy.get("stake_change"), "new_position": buy.get("new_position"),
-            "owned_after": buy.get("owned_after"), "drop": buy.get("drop"), "others": others,
-            "plan": buy.get("plan_10b5_1")})
-        content = (f"💼 **${buy['ticker']}** · {cshort}'s {rshort} buys {money(buy['value'])}"
-                   + (" · 🔥 CONVICTION" if "conviction" in tags else "") + (" · 🔎 CASE FILE" if "case" in tags else "")
-                   + f" · [SEC filing](<{filing_url}>)")
-        cards.post_card(webhook, content, card)
+
+        link = f" · [SEC filing](<{filing_url}>)"
+        cards.post_card(webhook, f"💼 **${buy['ticker']}** · {cshort}'s {rshort} buys {money(buy['value'])}{link}",
+                        cards.insider_card(dict(data, tags=tags)), image=image)
         posted += 1
         log(f"  posted {buy['ticker']} {name} {money(buy['value'])}")
 
-    # Case Files: post a result for every case whose event has passed
+        if bigcap_webhook and not bootstrap and big_cap(buy):
+            try:
+                cards.post_card(bigcap_webhook, f"🏦 **${buy['ticker']}** · {cshort}'s {rshort} buys {money(buy['value'])}{link}",
+                                cards.bigcap_card(dict(data, tags=tags)), image=image)
+                log(f"  BIG CAP {buy['ticker']}")
+            except Exception as e:
+                log(f"  big cap post skipped: {e}")
+
+    # buys before events: post a result for every case whose event has passed
     if case_webhook and not bootstrap:
         try:
             casefiles.update_cases(case_webhook, state)

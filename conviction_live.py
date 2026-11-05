@@ -1,5 +1,5 @@
 """
-Conviction Clusters, live (Strategy #1 on the server).
+Clusters Strategy, live (Strategy #1 on the server, #clusters-strategy).
 
 Same rule as the pre-registered backtest (conviction.py):
   - 3+ different insiders, $25K+ each, open-market buys within 7 days
@@ -11,11 +11,11 @@ Same rule as the pre-registered backtest (conviction.py):
 bot.py calls check() for every new buy and post_alert() when it returns a signal.
 `python conviction_live.py` (run by .github/workflows/conviction.yml) does the follow-up:
   - ~1 hour after the US open: "sell today" reminders in #conviction-alerts
-  - after the close: final results vs the S&P 500 in #track-record, plus running totals
-  - Fridays after the close: a weekly summary in #track-record
+  - after the close: final results vs the S&P 500 in #clusters-strategy, plus running totals
+  - Fridays after the close: a weekly summary in #clusters-strategy
 Signals are stored in conviction_log.json (committed back to the repo).
 
-Environment: WEBHOOK_CONVICTION (#conviction-alerts), WEBHOOK_CONV_RECORD (#track-record), MODE (remind|results|auto)
+Environment: WEBHOOK_CONVICTION (#conviction-alerts), MODE (remind|results|auto)
 """
 
 import json
@@ -173,7 +173,7 @@ def money(v):
     return f"${v / 1e6:,.1f}M" if v >= 1e6 else f"${v / 1e3:,.0f}K"
 
 
-def post_alert(webhook, sig, buy):
+def post_alert(webhook, sig, buy, image=None):
     """Post the alert to #conviction-alerts and log the signal."""
     dv = liquidity(sig["ticker"])
     ny_today = (datetime.now(timezone.utc) - timedelta(hours=5)).date()     # New York date (close enough)
@@ -201,15 +201,22 @@ def post_alert(webhook, sig, buy):
     insiders = []
     for p in sig["insiders"]:
         st_txt = "" if p["stake"] is None else ("new position" if p["stake"] >= NEW_POSITION else f"+{p['stake'] * 100:.0f}%")
-        insiders.append({"name": p["name"], "role": p["role"] or "Insider", "value": p["value"], "stake_text": st_txt})
+        try:
+            d_txt = datetime.fromisoformat(p["date"]).strftime("%b %d")
+        except (KeyError, TypeError, ValueError):
+            d_txt = ""
+        insiders.append({"name": p["name"], "role": p["role"] or "Insider", "value": p["value"], "stake_text": st_txt,
+                         "date": d_txt})
     card = cards.conviction_card({"ticker": sig["ticker"], "company": buy.get("company") or "", "n": len(sig["insiders"]),
+                                  "exchange": buy.get("exchange"), "sp500": buy.get("sp500"), "drop": buy.get("drop"),
+                                  "market_cap": buy.get("market_cap"), "size": buy.get("size"),
                                   "total": sig["total"], "days": days, "insiders": insiders, "number": number,
                                   "entry": f"{entry_day:%b %d}", "exit": f"{sell_day:%b %d}",
                                   "stats": ({"n": t["n"], "wins": t["wins"], "avg": t["avg"]} if t else None)})
     links = " · ".join(f"[filing {i + 1}](<{p['url']}>)" for i, p in enumerate(sig["insiders"][:4]) if p.get("url"))
-    content = (f"🔥 **CONVICTION SIGNAL #{number:03d} · ${sig['ticker']}** · {len(sig['insiders'])} insiders, "
+    content = (f"🔥 **CLUSTERS STRATEGY #{number:03d} · ${sig['ticker']}** · {len(sig['insiders'])} insiders, "
                f"{money(sig['total'])} · entry {entry_day:%a %b %d}" + (f" · {links}" if links else ""))
-    cards.post_card(webhook, content, card)
+    cards.post_card(webhook, content, card, image=image)
     data = load_log()
     data["signals"].append({"ticker": sig["ticker"], "company": buy.get("company"), "day": sig["day"],
                             "alerted": date.today().isoformat(), "entry_day": entry_day.isoformat(),
@@ -254,7 +261,7 @@ def totals_line(t):
 
 def run():
     remind_hook = os.environ.get("WEBHOOK_CONVICTION", "").strip()
-    record_hook = os.environ.get("WEBHOOK_CONV_RECORD", "").strip()
+    record_hook = remind_hook      # results are posted in #clusters-strategy itself (#track-record was removed)
     mode = os.environ.get("MODE", "auto")
     now = datetime.now(timezone.utc)
     if mode == "auto":
@@ -266,8 +273,8 @@ def run():
     if mode == "remind" and remind_hook:
         for s in data["signals"]:
             if s["status"] == "open" and s.get("sell_day") == today.isoformat() and not s.get("reminded"):
-                post(remind_hook, content=(f"⏰ **SELL DAY — ${s['ticker']}** (Conviction Cluster from {s['alerted']}). "
-                                           "The strategy exits at today's close. Result goes to <#1567258509056417882> tonight."))
+                post(remind_hook, content=(f"⏰ **SELL DAY — ${s['ticker']}** (Clusters Strategy signal from {s['alerted']}). "
+                                           "The strategy exits at today's close. The result is posted here tonight."))
                 s["reminded"] = True
                 changed = True
 
@@ -280,7 +287,7 @@ def run():
                 if record_hook:
                     import cards
                     num = data["signals"].index(s) + 1
-                    cards.post_card(record_hook, f"📊 **${s['ticker']}** · Conviction #{num:03d} closed: "
+                    cards.post_card(record_hook, f"📊 **${s['ticker']}** · Clusters Strategy #{num:03d} closed: "
                                     f"{s['ret'] * 100:+.1f}% vs S&P {s['spy'] * 100:+.1f}% · {mark}",
                                     cards.result_card({"ticker": s["ticker"], "number": num, "entry_day": s["entry_day"],
                                                        "exit_day": s["exit_day"], "entry": s["entry"], "exit": s["exit"],
@@ -291,7 +298,7 @@ def run():
             week = [s for s in data["signals"] if s.get("status") == "closed"
                     and s["exit_day"] >= (today - timedelta(days=6)).isoformat()]
             import cards
-            cards.post_card(record_hook, "📊 **Weekly update · Conviction Clusters**",
+            cards.post_card(record_hook, "📊 **Weekly update · Clusters Strategy**",
                             cards.weekly_card({"week": [(x["ticker"], x["excess"]) for x in week],
                                                "totals": t, "open_n": open_n}))
             data["last_weekly"] = today.isoformat()

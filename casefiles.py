@@ -174,7 +174,7 @@ def load_events():
 
 # ---------------------------------------------------------------- Polymarket
 
-def polymarket(query):
+def polymarket(query, min_volume=5000):
     """Most-traded active event for the query, shown by its most likely outcome:
     {'question','yes_label','yes','no_label','no','url'} or None."""
     try:
@@ -198,11 +198,12 @@ def polymarket(query):
                     continue
                 vol += float(m.get("volume") or 0)
                 if not top or prices[0] > top["yes"]:
-                    top = {"question": m.get("question") or ev.get("title"),
+                    top = {"question": m.get("question") or ev.get("title"), "end": (ev.get("endDate") or "")[:10],
                            "yes_label": str(outs[0]).upper(), "yes": prices[0],
                            "no_label": str(outs[1]).upper(), "no": prices[1],
                            "url": f"https://polymarket.com/event/{ev.get('slug')}"}
-            if top and vol >= 5000 and (not best or vol > best[0]):
+            if top and vol >= min_volume and (not best or vol > best[0]):
+                top["volume"] = vol
                 best = (vol, top)
         return best[1] if best else None
     except Exception as e:
@@ -210,17 +211,60 @@ def polymarket(query):
         return None
 
 
+# Political and macro questions that move each sector. Searched live on Polymarket; a market counts only if
+# it resolves within LOOKAHEAD_DAYS and has real money on it (MIN_POLY_VOLUME).
+SECTOR_QUERIES = {
+    "defense": ["defense spending", "NDAA", "Ukraine ceasefire"],
+    "oil": ["OPEC", "oil price", "Iran sanctions"],
+    "banks": ["Fed decision", "interest rates"],
+    "realestate": ["Fed decision", "mortgage rates"],
+    "insurance": ["hurricane", "Fed decision"],
+    "biotech": ["FDA approval", "drug pricing"],
+    "health": ["ACA subsidies", "Medicare", "drug pricing"],
+    "semis": ["chip export", "semiconductor tariffs", "China tariffs"],
+    "software": ["AI regulation", "antitrust"],
+    "solar": ["solar tax credit", "clean energy tax credits"],
+    "autos": ["auto tariffs", "EV tax credit"],
+    "utilities": ["Fed decision", "electricity prices"],
+    "mining": ["gold price", "tariffs"],
+    "airlines": ["oil price", "government shutdown"],
+    "retail": ["tariffs", "consumer confidence"],
+}
+MIN_POLY_VOLUME = 50_000
+EARNINGS_MIN_VALUE = 250_000     # earnings alone is a weak "event": only big buys
+EARNINGS_MAX_DAYS = 21
+
+
+def sector_markets(sector, today):
+    """Live political/macro prediction markets for the sector that resolve soon. [{date, title, market}]"""
+    out, seen = [], set()
+    end = today + timedelta(days=LOOKAHEAD_DAYS)
+    for q in SECTOR_QUERIES.get(sector or "", []):
+        m = polymarket(q, MIN_POLY_VOLUME)
+        if not m or not m.get("end") or m["url"] in seen:
+            continue
+        try:
+            d = date.fromisoformat(m["end"])
+        except ValueError:
+            continue
+        if today < d <= end:
+            seen.add(m["url"])
+            out.append({"date": d, "market": m, "query": q})
+    return out
+
+
 # ---------------------------------------------------------------- the radar
 
-def upcoming(ticker, sector, today):
-    """Sorted list of events within LOOKAHEAD_DAYS: {date, title, short, kind, why?, scenarios?, poly?}"""
+def upcoming(ticker, sector, today, value=0):
+    """Sorted list of events within LOOKAHEAD_DAYS: {date, title, short, kind, why?, scenarios?, poly?, market?}
+    Political / macro / FDA events come first; earnings only for big buys right before the report."""
     c = calendars()
     end = today + timedelta(days=LOOKAHEAD_DAYS)
     ev = []
     e = (c.get("earnings") or {}).get(ticker)
-    if e:
+    if e and value >= EARNINGS_MIN_VALUE:
         d = date.fromisoformat(e["date"])
-        if today < d <= end:
+        if today < d <= min(end, today + timedelta(days=EARNINGS_MAX_DAYS)):
             ev.append({"date": d, "kind": "earnings", "title": "Next earnings report",
                        "short": "earnings", "why": "The first numbers investors see after this buy.",
                        "scenarios": [["If results beat", "The insider's timing looks right; the stock could re-rate."],
@@ -239,7 +283,15 @@ def upcoming(ticker, sector, today):
         if ticker in x.get("tickers", []) or (sector and sector in x.get("sectors", [])):
             ev.append({"date": d, "kind": "calendar", "title": x["title"], "short": x.get("short", x["title"]),
                        "why": x.get("why", ""), "scenarios": x.get("scenarios"), "poly": x.get("polymarket_q")})
-    return sorted(ev, key=lambda e: e["date"])
+    for s in sector_markets(sector, today):
+        m = s["market"]
+        ev.append({"date": s["date"], "kind": "political", "title": m["question"], "short": m["question"],
+                   "why": "", "market": m})
+    rank = {"calendar": 0, "political": 1, "fda": 2, "earnings": 3}
+    # keep earnings only if nothing more interesting was found
+    if any(x["kind"] != "earnings" for x in ev):
+        ev = [x for x in ev if x["kind"] != "earnings"]
+    return sorted(ev, key=lambda e: (e["date"], rank.get(e["kind"], 9)))
 
 
 def qualifies(buy, others_14d, only_big_holder):
@@ -256,7 +308,7 @@ def _days(d, today):
 
 def maybe_open(webhook, state, buy, info):
     """Open a case if the buy qualifies and the radar finds events. Returns True if posted.
-    info: name, role, role_short, company_short, filing_url, exchange, profile, others_14d, only_big_holder, filed"""
+    info: name, role_short, company_short, filing_url, profile, others_14d, only_big_holder, card (insider_card data), image"""
     if not webhook or not qualifies(buy, info["others_14d"], info["only_big_holder"]):
         return False
     t = buy["ticker"]
@@ -265,59 +317,39 @@ def maybe_open(webhook, state, buy, info):
     if any(c["ticker"] == t and (today - date.fromisoformat(c["opened"])).days < 30 for c in cases):
         return False
     prof = info["profile"]
-    events = upcoming(t, prof.get("sector"), today)
+    events = upcoming(t, prof.get("sector"), today, buy["value"])
     if not events:
         log(f"  case check {t}: no upcoming events")
         return False
 
     first = events[0]
     n = len(cases) + CASE_NUMBER_START
-    drop = buy.get("drop")
-    drop_text = f"🔴 **−{drop * 100:.0f}%** from its 1-year high" if drop and drop >= 0.05 else "near its 1-year high"
-    title = (f"${t} · {info['company_short']}'s {info['role_short']} buys {money(buy['value'])}, "
-             f"{(first['date'] - today).days} day{'s' if (first['date'] - today).days != 1 else ''} before {first['short']}")
-    summary = (f"{info['name']} bought shares with their own money"
-               + (f" after the stock fell {drop * 100:.0f}% from its high" if drop and drop >= 0.15 else "")
-               + f", {(first['date'] - today).days} day{'s' if (first['date'] - today).days != 1 else ''} before {first['short']}.")
-    timeline = []
-    if drop and drop >= 0.15:
-        timeline.append({"when": "Before the buy", "icon": "🔴",
-                         "text": f"Stock **−{drop * 100:.0f}%** from its 1-year high."})
-    stake = ("opening a **new position**" if buy.get("new_position") else
-             f"stake **+{buy['stake_change']:.0f}%**" if buy.get("stake_change") else "")
-    timeline.append({"when": f"{info['filed']} · today", "icon": "🟢",
-                     "text": f"{info['role_short']} buys **{money(buy['value'])}**"
-                             + (f", {stake}" if stake else "")
-                             + (f". {info['others_14d']} other insider{'s' if info['others_14d'] != 1 else ''} bought in the last 14 days" if info["others_14d"] else "") + "."})
-    for e in events[:4]:
-        timeline.append({"when": f"{e['date']:%b %d} · {_days(e['date'], today)} ⏳", "icon": "🟡",
-                         "text": f"**{e['title']}.** {e.get('why') or ''}"})
+    lines = []
+    for e in events[:3]:
+        why = f" {e['why']}" if e.get("why") else ""
+        lines.append({"when": f"{e['date']:%b %d} ({_days(e['date'], today)})", "text": f"**{e['title']}.**{why}"})
 
-    market = None
-    for q in [e.get("poly") for e in events if e.get("poly")] + [info["company_short"]]:
-        if q:
-            market = polymarket(q)
-            # a company-name search must really be about that company
-            if market and q == info["company_short"] and q.split()[0].lower() not in (market["question"] or "").lower():
-                market = None
-            if market:
-                break
-    card = cards.case_card({
-        "number": n, "ticker": t, "sector": prof.get("label") or "", "exchange": info.get("exchange") or "",
-        "title": title, "summary": summary, "who": info["name"], "role": info["role"],
-        "value": buy["value"], "shares": buy["shares"], "price": buy["avg_price"], "drop_text": drop_text,
-        "company_desc": prof.get("industry") or "", "filed": info["filed"], "timeline": timeline,
-        "scenarios": first.get("scenarios"),
-        "market": dict(market, when=f"{today:%b %d}") if market else None})
+    market = next((e["market"] for e in events if e.get("market")), None)
+    if not market:
+        for q in [e.get("poly") for e in events if e.get("poly")] + [info["company_short"]]:
+            if q:
+                market = polymarket(q)
+                # a company-name search must really be about that company
+                if market and q == info["company_short"] and q.split()[0].lower() not in (market["question"] or "").lower():
+                    market = None
+                if market:
+                    break
+    card = cards.case_card(dict(info["card"], number=n, events=lines,
+                                market=dict(market, when=f"{today:%b %d}") if market else None))
     nd = (first["date"] - today).days
-    content = (f"🔎 **CASE FILE #{n:03d} · ${t}** · {info['role_short']} buys {money(buy['value'])}, "
+    content = (f"📅 **CASE #{n:03d} · ${t}** · {info['role_short']} buys {money(buy['value'])}, "
                f"{nd} day{'s' if nd != 1 else ''} before {first['short']} · [SEC filing](<{info['filing_url']}>)"
                + (f" · [Live odds](<{market['url']}>)" if market else ""))
-    cards.post_card(webhook, content, card)
+    cards.post_card(webhook, content, card, image=info.get("image"))
     cases.append({"number": n, "ticker": t, "opened": today.isoformat(), "price": round(buy["avg_price"], 4),
                   "event_date": first["date"].isoformat(), "event": first["title"], "status": "open",
                   "name": info["name"]})
-    log(f"  CASE FILE #{n:03d} {t}: {first['title']} {first['date']}")
+    log(f"  CASE #{n:03d} {t}: {first['title']} {first['date']}")
     return True
 
 
@@ -344,7 +376,7 @@ def update_cases(webhook, state):
                                            "event": f"{c['event']} ({date.fromisoformat(c['event_date']):%b %d})",
                                            "buy_price": c["price"], "now_price": now, "ret": ret, "spy": spy_ret,
                                            "days": (today - opened).days, "note": ""})
-            cards.post_card(webhook, f"✅ **CASE FILE #{c['number']:03d} · ${c['ticker']} · UPDATE** · "
+            cards.post_card(webhook, f"✅ **CASE #{c['number']:03d} · ${c['ticker']} · RESULT** · "
                                      f"{ret * 100:+.1f}% since the insider's buy", card)
             c.update(status="closed", closed=today.isoformat(), ret=round(ret, 4))
             log(f"  case #{c['number']} closed {ret * 100:+.1f}%")

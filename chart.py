@@ -242,3 +242,101 @@ def make_chart(ticker, buy_start, buy_end, avg_price):
     except Exception as e:
         print(f"  chart skipped for {ticker}: {e}", flush=True)
         return None, exchange, last_price, rows
+
+
+# ---------------------------------------------------------------- weekly chart (all alert cards)
+
+def to_weekly(rows):
+    """Daily (date, o, h, l, c) rows -> weekly candles keyed by the week's Monday."""
+    weeks = {}
+    for d, o, h, l, c in rows:
+        k = d - timedelta(days=d.weekday())
+        w = weeks.get(k)
+        if w is None:
+            weeks[k] = [k, o, h, l, c]
+        else:
+            w[2], w[3], w[4] = max(w[2], h), min(w[3], l), c
+    return [tuple(w) for _, w in sorted(weeks.items())]
+
+
+def render_weekly(ticker, rows, buys, exchange=None, years=2):
+    """Weekly candles for the last `years`, each buy marked with a numbered (or single) dot.
+    buys = [{'date': iso, 'price': float, 'name': str?, 'value': float?}]. Returns PNG bytes."""
+    end = rows[-1][0]
+    daily = [r for r in rows if r[0] >= end - timedelta(days=365 * years + 7)]
+    wk = to_weekly(daily)
+    dates = [mdates.date2num(w[0]) for w in wk]
+    fig, ax = plt.subplots(figsize=(8, 4.0), dpi=120)
+    fig.patch.set_facecolor(BG)
+    ax.set_facecolor(PANEL)
+    width = 4.2
+    for d, (_, o, h, l, c) in zip(dates, wk):
+        color = UP if c >= o else DOWN
+        ax.vlines(d, l, h, color=color, linewidth=0.9)
+        ax.add_patch(plt.Rectangle((d - width / 2, min(o, c)), width, max(abs(c - o), 1e-6),
+                                   facecolor=color, edgecolor=color, linewidth=0.5))
+    # 52-week high line
+    yr = [r for r in rows if r[0] >= end - timedelta(days=365)]
+    if yr:
+        hi = max(r[2] for r in yr)
+        ax.axhline(hi, color=MUTED, linestyle=":", linewidth=0.9, alpha=0.8)
+        ax.text(dates[0], hi, " 1-year high", color=MUTED, fontsize=7.5, va="bottom", ha="left")
+    pts = []
+    for b in buys:
+        try:
+            day = datetime.fromisoformat(str(b["date"])[:10]).date()
+        except (KeyError, ValueError, TypeError):
+            continue
+        price = b.get("price") or _close_on(rows, day)
+        pts.append((mdates.date2num(day), price, b))
+    pts.sort(key=lambda p: p[0])
+    many = len(pts) > 1
+    for i, (x, y, b) in enumerate(pts, start=1):
+        ax.plot([x], [y], marker="o", markersize=9 if not many else 7, markerfacecolor=BUY,
+                markeredgecolor=BG, markeredgewidth=1.5, zorder=6)
+    if pts:
+        avg = sum(p[1] for p in pts) / len(pts)
+        ax.axhline(avg, color=BUY, linestyle="--", linewidth=1, alpha=0.8)
+        txt = (f"{len(pts)} insiders bought" if many else "Insider bought") + f" · avg \\${avg:,.2f}"
+        ax.annotate(txt, xy=(pts[-1][0], pts[-1][1]), xytext=(-60, 36), textcoords="offset points", ha="right",
+                    color=BUY, fontsize=9, fontweight="bold",
+                    arrowprops=dict(arrowstyle="-|>", color=BUY, lw=1.4))
+    last = rows[-1][4]
+    label = f"{exchange}: \\${ticker}" if exchange else f"\\${ticker}"
+    tail = ""
+    if pts:
+        ch = (last / (sum(p[1] for p in pts) / len(pts)) - 1) * 100
+        tail = f" ({'+' if ch >= 0 else ''}{ch:.1f}% vs insider)"
+    ax.set_title(f"{label}  ·  {years} years, weekly  ·  now \\${last:,.2f}{tail}",
+                 color=TEXT, fontsize=11, loc="left", pad=10, fontweight="bold")
+    lo, hi2 = min(w[3] for w in wk), max(w[2] for w in wk)
+    ax.set_ylim(lo - (hi2 - lo) * 0.05, hi2 + (hi2 - lo) * 0.12)
+    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=(1, 4, 7, 10)))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b '%y"))
+    ax.yaxis.tick_right()
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"\\${v:,.2f}" if v < 100 else f"\\${v:,.0f}"))
+    ax.tick_params(colors=MUTED, labelsize=8)
+    ax.grid(True, color=GRID, linewidth=0.5)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.set_xlim(dates[0] - 4, dates[-1] + 8)
+    fig.text(0.01, 0.015, "Insider Radar · Source: SEC Form 4 · Not financial advice", color=MUTED, fontsize=7)
+    fig.tight_layout(rect=(0, 0.03, 1, 1))
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", facecolor=BG)
+    plt.close(fig)
+    return buf.getvalue()
+
+
+def make_weekly(ticker, rows=None, buys=(), exchange=None):
+    """PNG bytes or None. Uses the given daily rows (5y from make_chart) or fetches them. Never raises."""
+    try:
+        if not rows:
+            rows, ex = fetch_prices(ticker, "5y")
+            exchange = exchange or ex
+        if len(rows) < 60:
+            return None
+        return render_weekly(ticker, rows, list(buys), exchange)
+    except Exception as e:
+        print(f"  weekly chart skipped for {ticker}: {e}", flush=True)
+        return None
