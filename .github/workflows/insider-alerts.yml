@@ -34,6 +34,8 @@ jobs:
         env:
           WEBHOOK_INSIDER_BUYS: ${{ secrets.WEBHOOK_INSIDER_BUYS }}
           WEBHOOK_CONVICTION: ${{ secrets.WEBHOOK_CONVICTION }}
+          WEBHOOK_CLUSTERS: ${{ secrets.WEBHOOK_CLUSTERS }}
+          WEBHOOK_BIG_CAPS: ${{ secrets.WEBHOOK_BIG_CAPS }}
           WEBHOOK_CASE_FILES: ${{ secrets.WEBHOOK_CASE_FILES }}
           LDA_API_KEY: ${{ secrets.LDA_API_KEY }}
           SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}

@@ -1,0 +1,42 @@
+name: Top investors (13F)
+
+on:
+  schedule:
+    # every 3 hours; 13F filings can appear at any time of day
+    - cron: "23 */3 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: investors
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Check new 13F filings
+        env:
+          WEBHOOK_INVESTORS: ${{ secrets.WEBHOOK_INVESTORS }}
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+        run: python investors.py
+      - name: Save state
+        if: always()
+        run: |
+          if [ -n "$(git status --porcelain investors_state.json)" ]; then
+            git config user.name "insider-radar-bot"
+            git config user.email "insider-radar-bot@users.noreply.github.com"
+            git add investors_state.json
+            git commit -m "Update investors state [skip ci]"
+            git pull --rebase -q || true
+            git push
+          fi

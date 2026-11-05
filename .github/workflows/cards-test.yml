@@ -19,3 +19,9 @@ jobs:
         env:
           WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
         run: python cards_test.py
+      - name: Top investors test (Buffett + Burry latest 13F) to #bot-testing
+        env:
+          WEBHOOK_PROOF: ${{ secrets.WEBHOOK_PROOF }}
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          MODE: test
+        run: ONLY=1067983 python investors.py && ONLY=1649339 python investors.py
