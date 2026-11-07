@@ -18,7 +18,8 @@
   "H20035763",
   "H20035765",
   "H20035662",
-  "H20035778"
+  "H20035778",
+  "H20035770"
  ],
  "trades": [
   {
@@ -298,6 +299,42 @@
    "filed": "2026-11-05",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035778.pdf",
    "match": null
+  },
+  {
+   "who": "Josh Gottheimer (D-NJ)",
+   "ticker": "AMAT",
+   "type": "P",
+   "date": "2026-10-26",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-05",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035770.pdf",
+   "match": [
+    "Permanent Select Committee on Intelligence",
+    "defense / tech"
+   ]
+  },
+  {
+   "who": "Josh Gottheimer (D-NJ)",
+   "ticker": "BHE",
+   "type": "P",
+   "date": "2026-10-12",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-05",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035770.pdf",
+   "match": [
+    "Permanent Select Committee on Intelligence",
+    "defense / tech"
+   ]
+  },
+  {
+   "who": "Josh Gottheimer (D-NJ)",
+   "ticker": "TLK",
+   "type": "S",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-05",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035770.pdf",
+   "match": null
   }
  ],
  "sic": {
@@ -348,6 +385,18 @@
   "CSCO": [
    3576,
    "Computer Communications Equipment"
+  ],
+  "TLK": [
+   4813,
+   "Telephone Communications (No Radiotelephone)"
+  ],
+  "AMAT": [
+   3674,
+   "Semiconductors & Related Devices"
+  ],
+  "BHE": [
+   3672,
+   "Printed Circuit Boards"
   ]
  }
 }
