@@ -4226,7 +4226,32 @@
   "0001493152-26-050581",
   "0001493152-26-050582",
   "0000908834-26-000509",
-  "0001193125-26-452288"
+  "0001193125-26-452288",
+  "0001213900-26-117150",
+  "0001673358-26-000159",
+  "0001046179-26-000734",
+  "0001673358-26-000162",
+  "0001673358-26-000163",
+  "0001673358-26-000165",
+  "0001807266-26-000012",
+  "0001193125-26-452558",
+  "0001833119-26-000004",
+  "0001850971-26-000004",
+  "0001683382-26-000006",
+  "0002012952-26-000023",
+  "0002028515-26-000019",
+  "0001368458-26-000012",
+  "0001368458-26-000015",
+  "0001540655-26-000027",
+  "0002054635-26-000006",
+  "0001976408-26-000933",
+  "0001193125-26-452690",
+  "0001213900-26-117221",
+  "0001213900-26-117225",
+  "0001213900-26-117227",
+  "0001213900-26-117228",
+  "0001213900-26-117229",
+  "0001213900-26-117231"
  ],
  "buys": [
   {
@@ -6691,6 +6716,84 @@
    "price": 29.9884,
    "filed": "2026-11-07",
    "stake": 0.002030767318973634
+  },
+  {
+   "ticker": "NTHI",
+   "company": "NEONC TECHNOLOGIES HOLDINGS, INC.",
+   "name": "Amir F Heshmatpour",
+   "role": "CEO, President, Director, 10% Owner",
+   "value": 230510.0,
+   "date": "2026-11-05",
+   "accession": "0001213900-26-117150",
+   "url": "https://www.sec.gov/Archives/edgar/data/1443035/000121390026117150/xslF345X06/marketforms-74251.xml",
+   "price": 3.293,
+   "filed": "2026-11-09",
+   "stake": 0.021991831605403703
+  },
+  {
+   "ticker": "TSM",
+   "company": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD",
+   "name": "Michael R Splinter",
+   "role": "Director",
+   "value": 299880.0,
+   "date": "2026-11-05",
+   "accession": "0001046179-26-000734",
+   "url": "https://www.sec.gov/Archives/edgar/data/1046179/000104617926000734/xslF345X06/wk-form4_1794222904.xml",
+   "price": 357.0,
+   "filed": "2026-11-09",
+   "stake": 0.11103767349636484
+  },
+  {
+   "ticker": "MTDR",
+   "company": "Matador Resources Co",
+   "name": "Joseph Wm Foran",
+   "role": "Chairman and CEO, Director",
+   "value": 256800.0,
+   "date": "2026-11-05",
+   "accession": "0001540655-26-000027",
+   "url": "https://www.sec.gov/Archives/edgar/data/1520006/000154065526000027/xslF345X06/wk-form4_1794228110.xml",
+   "price": 51.36,
+   "filed": "2026-11-09",
+   "stake": 1.0477787091366304
+  },
+  {
+   "ticker": "MTDR",
+   "company": "Matador Resources Co",
+   "name": "Paul W Harvey",
+   "role": "Director",
+   "value": 26360.0,
+   "date": "2026-11-05",
+   "accession": "0002054635-26-000006",
+   "url": "https://www.sec.gov/Archives/edgar/data/1520006/000205463526000006/xslF345X06/wk-form4_1794228178.xml",
+   "price": 52.72,
+   "filed": "2026-11-09",
+   "stake": 0.0153275497378989
+  },
+  {
+   "ticker": "AUDC",
+   "company": "AUDIOCODES LTD",
+   "name": "Shabtai Adlersberg",
+   "role": "President and CEO",
+   "value": 126139.62,
+   "date": "2026-11-05",
+   "accession": "0001976408-26-000933",
+   "url": "https://www.sec.gov/Archives/edgar/data/1086434/000197640826000933/xslF345X06/primary_doc.xml",
+   "price": 7.9139,
+   "filed": "2026-11-09",
+   "stake": 0.0032185350788822785
+  },
+  {
+   "ticker": "API",
+   "company": "Agora, Inc.",
+   "name": "Bin Zhao",
+   "role": "CEO, Director",
+   "value": 123109.37,
+   "date": "2026-11-04",
+   "accession": "0001193125-26-452690",
+   "url": "https://www.sec.gov/Archives/edgar/data/1802883/000119312526452690/xslF345X06/ownership.xml",
+   "price": 4.2948,
+   "filed": "2026-11-09",
+   "stake": 0.012611730295078852
   }
  ],
  "clusters_posted": [
@@ -6700,7 +6803,7 @@
   "UPBD:6",
   "LKQ:3"
  ],
- "last_feed_time": "2026-11-06T21:55:03-05:00",
+ "last_feed_time": "2026-11-09T08:07:32-05:00",
  "cases": [
   {
    "number": 2,
@@ -6761,6 +6864,16 @@
    "event": "Next earnings report",
    "status": "open",
    "name": "Michael B Hoffman"
+  },
+  {
+   "number": 8,
+   "ticker": "MTDR",
+   "opened": "2026-11-09",
+   "price": 51.36,
+   "event_date": "2026-12-01",
+   "event": "Will WTI Crude Oil (WTI) hit (LOW) $85 in November?",
+   "status": "open",
+   "name": "Joseph Wm Foran"
   }
  ],
  "clusters_judged": {
