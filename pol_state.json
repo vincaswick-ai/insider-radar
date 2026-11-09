@@ -19,7 +19,12 @@
   "H20035765",
   "H20035662",
   "H20035778",
-  "H20035770"
+  "H20035770",
+  "S02b5fe88-e8e1-4ef3-b6b5-6a46b420fb3c",
+  "Sa89c0c6b-4c12-4955-98f9-3a54ca52d8a3",
+  "H9116399",
+  "H20035775",
+  "H20035780"
  ],
  "trades": [
   {
@@ -335,6 +340,86 @@
    "filed": "2026-11-05",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035770.pdf",
    "match": null
+  },
+  {
+   "who": "Sheldon Whitehouse (D)",
+   "ticker": "MSFT",
+   "type": "S (partial)",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-02",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/02b5fe88-e8e1-4ef3-b6b5-6a46b420fb3c/",
+   "match": null
+  },
+  {
+   "who": "Sheldon Whitehouse (D)",
+   "ticker": "AMGN",
+   "type": "S",
+   "date": "2026-10-15",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-02",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/02b5fe88-e8e1-4ef3-b6b5-6a46b420fb3c/",
+   "match": null
+  },
+  {
+   "who": "Shelley Moore Capito (R)",
+   "ticker": "ZTS",
+   "type": "S",
+   "date": "2026-10-21",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-04",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/a89c0c6b-4c12-4955-98f9-3a54ca52d8a3/",
+   "match": null
+  },
+  {
+   "who": "Shelley Moore Capito (R)",
+   "ticker": "MSFT",
+   "type": "S (partial)",
+   "date": "2026-10-21",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-04",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/a89c0c6b-4c12-4955-98f9-3a54ca52d8a3/",
+   "match": null
+  },
+  {
+   "who": "Shelley Moore Capito (R)",
+   "ticker": "META",
+   "type": "S (partial)",
+   "date": "2026-10-21",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-04",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/a89c0c6b-4c12-4955-98f9-3a54ca52d8a3/",
+   "match": null
+  },
+  {
+   "who": "Shelley Moore Capito (R)",
+   "ticker": "AAPL",
+   "type": "S (partial)",
+   "date": "2026-10-21",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-04",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/a89c0c6b-4c12-4955-98f9-3a54ca52d8a3/",
+   "match": null
+  },
+  {
+   "who": "John J. McGuire III (R-VA)",
+   "ticker": "WDC",
+   "type": "S",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-06",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035775.pdf",
+   "match": null
+  },
+  {
+   "who": "Nancy Pelosi (D-CA)",
+   "ticker": "WBD",
+   "type": "S",
+   "date": "2026-10-07",
+   "amount": "$50,001 - $100,000",
+   "filed": "2026-11-06",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035780.pdf",
+   "match": null
   }
  ],
  "sic": {
@@ -397,6 +482,34 @@
   "BHE": [
    3672,
    "Printed Circuit Boards"
+  ],
+  "MSFT": [
+   7372,
+   "Services-Prepackaged Software"
+  ],
+  "AMGN": [
+   2836,
+   "Biological Products, (No Diagnostic Substances)"
+  ],
+  "META": [
+   7370,
+   "Services-Computer Programming, Data Processing, Etc."
+  ],
+  "ZTS": [
+   2834,
+   "Pharmaceutical Preparations"
+  ],
+  "AAPL": [
+   3571,
+   "Electronic Computers"
+  ],
+  "WDC": [
+   3572,
+   "Computer Storage Devices"
+  ],
+  "WBD": [
+   null,
+   ""
   ]
  }
 }
