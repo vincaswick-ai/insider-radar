@@ -24,7 +24,9 @@
   "Sa89c0c6b-4c12-4955-98f9-3a54ca52d8a3",
   "H9116399",
   "H20035775",
-  "H20035780"
+  "H20035780",
+  "H20024921",
+  "H20035014"
  ],
  "trades": [
   {
@@ -419,6 +421,16 @@
    "amount": "$50,001 - $100,000",
    "filed": "2026-11-06",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035780.pdf",
+   "match": null
+  },
+  {
+   "who": "David Kustoff (R-TN)",
+   "ticker": "WBD",
+   "type": "S",
+   "date": "2026-10-07",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-09",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20024921.pdf",
    "match": null
   }
  ],
