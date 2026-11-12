@@ -26,7 +26,10 @@
   "H20035775",
   "H20035780",
   "H20024921",
-  "H20035014"
+  "H20035014",
+  "H20035788",
+  "H9116403",
+  "H20035806"
  ],
  "trades": [
   {
@@ -432,6 +435,589 @@
    "filed": "2026-11-09",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20024921.pdf",
    "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "ARE",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "LNT",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "APP",
+   "type": "S (partial)",
+   "date": "2026-10-14",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "APP",
+   "type": "S",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "ARGX",
+   "type": "P",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "ARGX",
+   "type": "P",
+   "date": "2026-10-14",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "ARGX",
+   "type": "P",
+   "date": "2026-10-27",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "BNS",
+   "type": "P",
+   "date": "2026-10-09",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "BNPQF",
+   "type": "S",
+   "date": "2026-10-13",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "BBIO",
+   "type": "P",
+   "date": "2026-10-27",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "BBIO",
+   "type": "P",
+   "date": "2026-11-02",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "CF",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "CMG",
+   "type": "S",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "CIEN",
+   "type": "S",
+   "date": "2026-10-21",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "CINF",
+   "type": "S",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "CSCO",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "CMS",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "CMCSA",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "CTVA",
+   "type": "S (partial)",
+   "date": "2026-10-14",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "EIX",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "LLY",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "ENGQF",
+   "type": "S",
+   "date": "2026-10-13",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "FIS",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "FOXA",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "GIS",
+   "type": "S",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "HD",
+   "type": "S (partial)",
+   "date": "2026-10-06",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "ILMN",
+   "type": "S (partial)",
+   "date": "2026-10-27",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "PODD",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "LNTH",
+   "type": "S",
+   "date": "2026-10-15",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "LNTH",
+   "type": "S (partial)",
+   "date": "2026-10-14",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "LITE",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "MTSI",
+   "type": "P",
+   "date": "2026-10-27",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "META",
+   "type": "P",
+   "date": "2026-10-09",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "MICR",
+   "type": "S (partial)",
+   "date": "2026-10-21",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "MBGL",
+   "type": "P",
+   "date": "2026-10-15",
+   "amount": "$50,001 - $100,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "MRNA",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "MRAAF",
+   "type": "P",
+   "date": "2026-10-08",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "NVDA",
+   "type": "S (partial)",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "ON",
+   "type": "P",
+   "date": "2026-10-14",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "PTC",
+   "type": "S (partial)",
+   "date": "2026-10-27",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "O",
+   "type": "S (partial)",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "RVTY",
+   "type": "S (partial)",
+   "date": "2026-10-27",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "NOW",
+   "type": "P",
+   "date": "2026-10-21",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "SNEJF",
+   "type": "P",
+   "date": "2026-10-14",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "SARO",
+   "type": "P",
+   "date": "2026-10-14",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": [
+    "Armed Services",
+    "defense"
+   ]
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "STRC",
+   "type": "P",
+   "date": "2026-06-05",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "STRC",
+   "type": "S",
+   "date": "2026-10-15",
+   "amount": "$50,001 - $100,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "TXRH",
+   "type": "P",
+   "date": "2026-10-16",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "CPB",
+   "type": "S",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "COO",
+   "type": "P",
+   "date": "2026-10-14",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "TTD",
+   "type": "S",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "TKO",
+   "type": "S",
+   "date": "2026-10-06",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "TOELF",
+   "type": "S (partial)",
+   "date": "2026-10-23",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "TOELF",
+   "type": "S",
+   "date": "2026-10-30",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "UBER",
+   "type": "S",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "WBD",
+   "type": "S",
+   "date": "2026-10-07",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Gilbert Ray Cisneros, Jr. (D-CA)",
+   "ticker": "WFC",
+   "type": "P",
+   "date": "2026-10-20",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035788.pdf",
+   "match": null
+  },
+  {
+   "who": "Julie Johnson (D-TX)",
+   "ticker": "WBD",
+   "type": "S",
+   "date": "2026-10-07",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-10",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035806.pdf",
+   "match": null
   }
  ],
  "sic": {
@@ -522,6 +1108,190 @@
   "WBD": [
    null,
    ""
+  ],
+  "BBIO": [
+   2834,
+   "Pharmaceutical Preparations"
+  ],
+  "PODD": [
+   3841,
+   "Surgical & Medical Instruments & Apparatus"
+  ],
+  "PTC": [
+   7372,
+   "Services-Prepackaged Software"
+  ],
+  "MBGL": [
+   7389,
+   "Services-Business Services, NEC"
+  ],
+  "UBER": [
+   7389,
+   "Services-Business Services, NEC"
+  ],
+  "CMCSA": [
+   4841,
+   "Cable & Other Pay Television Services"
+  ],
+  "CF": [
+   2870,
+   "Agricultural Chemicals"
+  ],
+  "NOW": [
+   7372,
+   "Services-Prepackaged Software"
+  ],
+  "APP": [
+   7370,
+   "Services-Computer Programming, Data Processing, Etc."
+  ],
+  "CPB": [
+   2000,
+   "Food and Kindred Products"
+  ],
+  "CTVA": [
+   100,
+   "Agricultural Production-Crops"
+  ],
+  "STRC": [
+   6199,
+   "Finance Services"
+  ],
+  "LLY": [
+   2834,
+   "Pharmaceutical Preparations"
+  ],
+  "SARO": [
+   3724,
+   "Aircraft Engines & Engine Parts"
+  ],
+  "ON": [
+   3674,
+   "Semiconductors & Related Devices"
+  ],
+  "FIS": [
+   7389,
+   "Services-Business Services, NEC"
+  ],
+  "BNS": [
+   6022,
+   "State Commercial Banks"
+  ],
+  "TOELF": [
+   null,
+   ""
+  ],
+  "ENGQF": [
+   null,
+   ""
+  ],
+  "BNPQF": [
+   null,
+   ""
+  ],
+  "LNTH": [
+   2835,
+   "In Vitro & In Vivo Diagnostic Substances"
+  ],
+  "HD": [
+   5211,
+   "Retail-Lumber & Other Building Materials Dealers"
+  ],
+  "WFC": [
+   6021,
+   "National Commercial Banks"
+  ],
+  "LITE": [
+   3669,
+   "Communications Equipment, NEC"
+  ],
+  "MRAAF": [
+   null,
+   ""
+  ],
+  "ARGX": [
+   2836,
+   "Biological Products, (No Diagnostic Substances)"
+  ],
+  "MICR": [
+   null,
+   ""
+  ],
+  "TTD": [
+   7370,
+   "Services-Computer Programming, Data Processing, Etc."
+  ],
+  "SNEJF": [
+   3651,
+   "Household Audio & Video Equipment"
+  ],
+  "EIX": [
+   4911,
+   "Electric Services"
+  ],
+  "ARE": [
+   6798,
+   "Real Estate Investment Trusts"
+  ],
+  "MTSI": [
+   3674,
+   "Semiconductors & Related Devices"
+  ],
+  "TKO": [
+   7900,
+   "Services-Amusement & Recreation Services"
+  ],
+  "TXRH": [
+   5812,
+   "Retail-Eating  Places"
+  ],
+  "FOXA": [
+   4833,
+   "Television Broadcasting Stations"
+  ],
+  "CINF": [
+   6331,
+   "Fire, Marine & Casualty Insurance"
+  ],
+  "ILMN": [
+   3826,
+   "Laboratory Analytical Instruments"
+  ],
+  "COO": [
+   3851,
+   "Ophthalmic Goods"
+  ],
+  "MRNA": [
+   2836,
+   "Biological Products, (No Diagnostic Substances)"
+  ],
+  "O": [
+   6798,
+   "Real Estate Investment Trusts"
+  ],
+  "CMS": [
+   4931,
+   "Electric & Other Services Combined"
+  ],
+  "LNT": [
+   4931,
+   "Electric & Other Services Combined"
+  ],
+  "RVTY": [
+   3826,
+   "Laboratory Analytical Instruments"
+  ],
+  "CIEN": [
+   3661,
+   "Telephone & Telegraph Apparatus"
+  ],
+  "GIS": [
+   2040,
+   "Grain Mill Products"
+  ],
+  "CMG": [
+   5812,
+   "Retail-Eating  Places"
   ]
  }
 }
