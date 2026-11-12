@@ -9101,8 +9101,10 @@
    "price": 1.0,
    "event_date": "2026-11-11",
    "event": "Next earnings report",
-   "status": "open",
-   "name": "Michael B Hoffman"
+   "status": "closed",
+   "name": "Michael B Hoffman",
+   "closed": "2026-11-12",
+   "ret": -0.15
   },
   {
    "number": 8,
