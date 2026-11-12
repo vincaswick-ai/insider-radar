@@ -5248,7 +5248,25 @@
   "0001213900-26-118234",
   "0001213900-26-118235",
   "0001493152-26-051085",
-  "0001193125-26-456010"
+  "0001193125-26-456010",
+  "0001225208-26-008818",
+  "0000899140-26-001275",
+  "0001225208-26-008822",
+  "0000950142-26-002995",
+  "0001104659-26-125536",
+  "0000899140-26-001276",
+  "0001104659-26-125551",
+  "0000943819-26-000091",
+  "0001193125-26-456634",
+  "0001104659-26-125565",
+  "0001673358-26-000167",
+  "0001104659-26-125577",
+  "0001104659-26-125586",
+  "0001104659-26-125593",
+  "0001104659-26-125604",
+  "0001193125-26-456680",
+  "0001213900-26-118281",
+  "0001213900-26-118288"
  ],
  "buys": [
   {
@@ -9026,6 +9044,123 @@
    "price": 2.414,
    "filed": "2026-11-11",
    "stake": 0.21080100514858452
+  },
+  {
+   "ticker": "COHR",
+   "company": "COHERENT CORP.",
+   "name": "Enrico Digirolomo",
+   "role": "Director",
+   "value": 222885.0,
+   "date": "2026-11-10",
+   "accession": "0000899140-26-001275",
+   "url": "https://www.sec.gov/Archives/edgar/data/820318/000089914026001275/xslF345X06/form4.xml",
+   "price": 222.885,
+   "filed": "2026-11-12",
+   "stake": 0.09394964299135664
+  },
+  {
+   "ticker": "CSQR",
+   "company": "Csquare, Inc.",
+   "name": "Spencer Edward Mullee",
+   "role": "CEO, Director",
+   "value": 247028.6,
+   "date": "2026-11-11",
+   "accession": "0000950142-26-002995",
+   "url": "https://www.sec.gov/Archives/edgar/data/1810763/000095014226002995/xslF345X06/es260854467_4-mullee.xml",
+   "price": 18.2,
+   "filed": "2026-11-12",
+   "stake": 0.0038004416721943357
+  },
+  {
+   "ticker": "GSM",
+   "company": "Ferroglobe PLC",
+   "name": "Marco Levi",
+   "role": "CEO, Director",
+   "value": 50600.0,
+   "date": "2026-11-06",
+   "accession": "0001104659-26-125536",
+   "url": "https://www.sec.gov/Archives/edgar/data/1639877/000110465926125536/xslF345X06/tm2629473-1_4seq1.xml",
+   "price": 2.53,
+   "filed": "2026-11-12",
+   "stake": 0.021649285898304643
+  },
+  {
+   "ticker": "COHR",
+   "company": "COHERENT CORP.",
+   "name": "James Robert Anderson",
+   "role": "CEO, Director",
+   "value": 997400.0,
+   "date": "2026-11-09",
+   "accession": "0000899140-26-001276",
+   "url": "https://www.sec.gov/Archives/edgar/data/820318/000089914026001276/xslF345X06/form4.xml",
+   "price": 199.48,
+   "filed": "2026-11-12",
+   "stake": 0.02698516355707632
+  },
+  {
+   "ticker": "GSM",
+   "company": "Ferroglobe PLC",
+   "name": "Madrid Javier Lopez",
+   "role": "EXECUTIVE CHAIRMAN, Director",
+   "value": 75000.47,
+   "date": "2026-11-06",
+   "accession": "0001104659-26-125551",
+   "url": "https://www.sec.gov/Archives/edgar/data/1639877/000110465926125551/xslF345X06/tm2629473-2_4seq1.xml",
+   "price": 2.6159,
+   "filed": "2026-11-12",
+   "stake": 0.28749197818065136
+  },
+  {
+   "ticker": "GSM",
+   "company": "Ferroglobe PLC",
+   "name": "David Marie Gabriel Girardeau",
+   "role": "SEE REMARKS",
+   "value": 40610.0,
+   "date": "2026-11-06",
+   "accession": "0001104659-26-125586",
+   "url": "https://www.sec.gov/Archives/edgar/data/1639877/000110465926125586/xslF345X06/tm2629473-5_4seq1.xml",
+   "price": 2.62,
+   "filed": "2026-11-12",
+   "stake": 0.28098034950329925
+  },
+  {
+   "ticker": "SJT",
+   "company": "SAN JUAN BASIN ROYALTY TRUST",
+   "name": "Eric L Oliver",
+   "role": "10% Owner",
+   "value": 1404986.74,
+   "date": "2026-11-09",
+   "accession": "0001104659-26-125604",
+   "url": "https://www.sec.gov/Archives/edgar/data/319655/000110465926125604/xslF345X06/tm2629624-3_4seq1.xml",
+   "price": 3.9873,
+   "filed": "2026-11-12",
+   "stake": 0.07676056491439799
+  },
+  {
+   "ticker": "NTHI",
+   "company": "NEONC TECHNOLOGIES HOLDINGS, INC.",
+   "name": "Amir F Heshmatpour",
+   "role": "CEO, President, Director, 10% Owner",
+   "value": 294500.0,
+   "date": "2026-11-10",
+   "accession": "0001213900-26-118281",
+   "url": "https://www.sec.gov/Archives/edgar/data/1443035/000121390026118281/xslF345X06/marketforms-74277.xml",
+   "price": 4.2071,
+   "filed": "2026-11-12",
+   "stake": 0.021452650934722647
+  },
+  {
+   "ticker": "MNR",
+   "company": "MACH NATURAL RESOURCES LP",
+   "name": "Tom L. Ward",
+   "role": "See Remarks, Director, 10% Owner",
+   "value": 1008700.0,
+   "date": "2026-11-09",
+   "accession": "0001213900-26-118288",
+   "url": "https://www.sec.gov/Archives/edgar/data/1038276/000121390026118288/xslF345X06/ownership.xml",
+   "price": 9.17,
+   "filed": "2026-11-12",
+   "stake": 0.008167840509102985
   }
  ],
  "clusters_posted": [
@@ -9042,7 +9177,7 @@
   "UPBD:7",
   "SLQT:3"
  ],
- "last_feed_time": "2026-11-10T21:59:02-05:00",
+ "last_feed_time": "2026-11-12T06:14:41-05:00",
  "cases": [
   {
    "number": 2,
@@ -9166,6 +9301,7 @@
   "LBTY": "2026-11-06",
   "SLQT": "2026-11-06",
   "DTI": "2026-11-09",
-  "FUN": "2026-11-06"
+  "FUN": "2026-11-06",
+  "GSM": "2026-11-06"
  }
 }
