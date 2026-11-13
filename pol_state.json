@@ -29,7 +29,9 @@
   "H20035014",
   "H20035788",
   "H9116403",
-  "H20035806"
+  "H20035806",
+  "H20035821",
+  "H20035826"
  ],
  "trades": [
   {
@@ -1018,6 +1020,26 @@
    "filed": "2026-11-10",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035806.pdf",
    "match": null
+  },
+  {
+   "who": "Rick W. Allen (R-GA)",
+   "ticker": "SHW",
+   "type": "S (partial)",
+   "date": "2026-10-09",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-11",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035821.pdf",
+   "match": null
+  },
+  {
+   "who": "Lloyd Doggett (D-TX)",
+   "ticker": "KO",
+   "type": "P",
+   "date": "2026-10-01",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-11",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035826.pdf",
+   "match": null
   }
  ],
  "sic": {
@@ -1292,6 +1314,14 @@
   "CMG": [
    5812,
    "Retail-Eating  Places"
+  ],
+  "SHW": [
+   5200,
+   "Retail-Building Materials, Hardware, Garden Supply"
+  ],
+  "KO": [
+   2080,
+   "Beverages"
   ]
  }
 }
