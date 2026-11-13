@@ -31,7 +31,8 @@
   "H9116403",
   "H20035806",
   "H20035821",
-  "H20035826"
+  "H20035826",
+  "H20035831"
  ],
  "trades": [
   {
@@ -1040,6 +1041,196 @@
    "filed": "2026-11-11",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035826.pdf",
    "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "GOOGL",
+   "type": "P",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "GOOGL",
+   "type": "P",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "AMGN",
+   "type": "S",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "AMGN",
+   "type": "S",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "T",
+   "type": "P",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "T",
+   "type": "P",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "AVGO",
+   "type": "P",
+   "date": "2026-11-05",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "ETN",
+   "type": "P",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "ETN",
+   "type": "P",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "LLY",
+   "type": "S",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "LLY",
+   "type": "S",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "HD",
+   "type": "S",
+   "date": "2026-11-05",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "IBP",
+   "type": "P",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "KR",
+   "type": "S",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "KR",
+   "type": "S",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "LRCX",
+   "type": "P",
+   "date": "2026-11-05",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "PG",
+   "type": "S",
+   "date": "2026-11-05",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "V",
+   "type": "S",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
+  },
+  {
+   "who": "David J. Taylor (R-OH)",
+   "ticker": "V",
+   "type": "S",
+   "date": "2026-11-03",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-12",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
+   "match": null
   }
  ],
  "sic": {
@@ -1322,6 +1513,34 @@
   "KO": [
    2080,
    "Beverages"
+  ],
+  "ETN": [
+   3590,
+   "Misc Industrial & Commercial Machinery & Equipment"
+  ],
+  "IBP": [
+   1520,
+   "General Bldg Contractors - Residential Bldgs"
+  ],
+  "GOOGL": [
+   7370,
+   "Services-Computer Programming, Data Processing, Etc."
+  ],
+  "T": [
+   4813,
+   "Telephone Communications (No Radiotelephone)"
+  ],
+  "V": [
+   7389,
+   "Services-Business Services, NEC"
+  ],
+  "LRCX": [
+   3559,
+   "Special Industry Machinery, NEC"
+  ],
+  "KR": [
+   5411,
+   "Retail-Grocery Stores"
   ]
  }
 }
