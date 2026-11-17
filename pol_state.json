@@ -36,7 +36,10 @@
   "H20035779",
   "H20035807",
   "H20035757",
-  "H20035786"
+  "H20035786",
+  "H20035811",
+  "S21941188-c04d-4713-8e6f-d954918e93fd",
+  "S06b7b716-bdc0-4c47-a4aa-96624e1e702c"
  ],
  "trades": [
   {
@@ -1285,6 +1288,132 @@
    "filed": "2026-11-13",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035757.pdf",
    "match": null
+  },
+  {
+   "who": "Byron Donalds (R-FL)",
+   "ticker": "ADSK",
+   "type": "S",
+   "date": "2026-10-02",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-16",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035811.pdf",
+   "match": null
+  },
+  {
+   "who": "Byron Donalds (R-FL)",
+   "ticker": "ADSK",
+   "type": "S",
+   "date": "2026-10-02",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-16",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035811.pdf",
+   "match": null
+  },
+  {
+   "who": "Byron Donalds (R-FL)",
+   "ticker": "IBKR",
+   "type": "P",
+   "date": "2026-10-02",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-16",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035811.pdf",
+   "match": [
+    "Financial Services",
+    "finance"
+   ]
+  },
+  {
+   "who": "Byron Donalds (R-FL)",
+   "ticker": "IBKR",
+   "type": "P",
+   "date": "2026-10-02",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-16",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035811.pdf",
+   "match": [
+    "Financial Services",
+    "finance"
+   ]
+  },
+  {
+   "who": "Byron Donalds (R-FL)",
+   "ticker": "NFLX",
+   "type": "S",
+   "date": "2026-10-02",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-16",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035811.pdf",
+   "match": null
+  },
+  {
+   "who": "Byron Donalds (R-FL)",
+   "ticker": "NFLX",
+   "type": "S",
+   "date": "2026-10-02",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-16",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035811.pdf",
+   "match": null
+  },
+  {
+   "who": "Byron Donalds (R-FL)",
+   "ticker": "ZTS",
+   "type": "S",
+   "date": "2026-10-02",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-16",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035811.pdf",
+   "match": null
+  },
+  {
+   "who": "Byron Donalds (R-FL)",
+   "ticker": "ZTS",
+   "type": "S",
+   "date": "2026-10-02",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-16",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035811.pdf",
+   "match": null
+  },
+  {
+   "who": "John Boozman (R)",
+   "ticker": "CMBS",
+   "type": "S (partial)",
+   "date": "2026-10-21",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-17",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/21941188-c04d-4713-8e6f-d954918e93fd/",
+   "match": null
+  },
+  {
+   "who": "John Boozman (R)",
+   "ticker": "TLH",
+   "type": "S (partial)",
+   "date": "2026-10-21",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-17",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/21941188-c04d-4713-8e6f-d954918e93fd/",
+   "match": null
+  },
+  {
+   "who": "John Boozman (R)",
+   "ticker": "HYBB",
+   "type": "P",
+   "date": "2026-10-21",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-17",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/06b7b716-bdc0-4c47-a4aa-96624e1e702c/",
+   "match": null
+  },
+  {
+   "who": "John Boozman (R)",
+   "ticker": "MBB",
+   "type": "P",
+   "date": "2026-10-21",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-17",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/06b7b716-bdc0-4c47-a4aa-96624e1e702c/",
+   "match": null
   }
  ],
  "sic": {
@@ -1615,6 +1744,34 @@
   "DDOG": [
    7372,
    "Services-Prepackaged Software"
+  ],
+  "IBKR": [
+   6211,
+   "Security Brokers, Dealers & Flotation Companies"
+  ],
+  "ADSK": [
+   7372,
+   "Services-Prepackaged Software"
+  ],
+  "NFLX": [
+   7841,
+   "Services-Video Tape Rental"
+  ],
+  "CMBS": [
+   null,
+   ""
+  ],
+  "TLH": [
+   null,
+   ""
+  ],
+  "HYBB": [
+   null,
+   ""
+  ],
+  "MBB": [
+   null,
+   ""
   ]
  }
 }
