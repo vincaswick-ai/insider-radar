@@ -32,7 +32,11 @@
   "H20035806",
   "H20035821",
   "H20035826",
-  "H20035831"
+  "H20035831",
+  "H20035779",
+  "H20035807",
+  "H20035757",
+  "H20035786"
  ],
  "trades": [
   {
@@ -1231,6 +1235,56 @@
    "filed": "2026-11-12",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035831.pdf",
    "match": null
+  },
+  {
+   "who": "J. French Hill (R-AR)",
+   "ticker": "JBGS",
+   "type": "S",
+   "date": "2026-11-09",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-13",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035807.pdf",
+   "match": null
+  },
+  {
+   "who": "Jonathan L. Jackson (D-IL)",
+   "ticker": "BP",
+   "type": "S (partial)",
+   "date": "2026-10-01",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-13",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035757.pdf",
+   "match": null
+  },
+  {
+   "who": "Jonathan L. Jackson (D-IL)",
+   "ticker": "DDOG",
+   "type": "P",
+   "date": "2026-10-22",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-13",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035757.pdf",
+   "match": null
+  },
+  {
+   "who": "Jonathan L. Jackson (D-IL)",
+   "ticker": "EL",
+   "type": "P",
+   "date": "2026-10-12",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-13",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035757.pdf",
+   "match": null
+  },
+  {
+   "who": "Jonathan L. Jackson (D-IL)",
+   "ticker": "SPHR",
+   "type": "S",
+   "date": "2026-10-12",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-13",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035757.pdf",
+   "match": null
   }
  ],
  "sic": {
@@ -1541,6 +1595,26 @@
   "KR": [
    5411,
    "Retail-Grocery Stores"
+  ],
+  "JBGS": [
+   6798,
+   "Real Estate Investment Trusts"
+  ],
+  "SPHR": [
+   7900,
+   "Services-Amusement & Recreation Services"
+  ],
+  "BP": [
+   2911,
+   "Petroleum Refining"
+  ],
+  "EL": [
+   2844,
+   "Perfumes, Cosmetics & Other Toilet Preparations"
+  ],
+  "DDOG": [
+   7372,
+   "Services-Prepackaged Software"
   ]
  }
 }
