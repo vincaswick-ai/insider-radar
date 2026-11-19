@@ -39,7 +39,11 @@
   "H20035786",
   "H20035811",
   "S21941188-c04d-4713-8e6f-d954918e93fd",
-  "S06b7b716-bdc0-4c47-a4aa-96624e1e702c"
+  "S06b7b716-bdc0-4c47-a4aa-96624e1e702c",
+  "H20036849",
+  "H20036855",
+  "H20036864",
+  "H20036844"
  ],
  "trades": [
   {
@@ -1414,6 +1418,136 @@
    "filed": "2026-11-17",
    "url": "https://efdsearch.senate.gov/search/view/ptr/06b7b716-bdc0-4c47-a4aa-96624e1e702c/",
    "match": null
+  },
+  {
+   "who": "Steve Cohen (D-TN)",
+   "ticker": "WBD",
+   "type": "S",
+   "date": "2026-10-07",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-18",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036849.pdf",
+   "match": null
+  },
+  {
+   "who": "Michael A. Rulli (R-OH)",
+   "ticker": "GOOGL",
+   "type": "S (partial)",
+   "date": "2026-11-04",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-18",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036855.pdf",
+   "match": null
+  },
+  {
+   "who": "Michael A. Rulli (R-OH)",
+   "ticker": "COST",
+   "type": "S (partial)",
+   "date": "2026-11-12",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-18",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036855.pdf",
+   "match": null
+  },
+  {
+   "who": "Michael A. Rulli (R-OH)",
+   "ticker": "LLY",
+   "type": "S (partial)",
+   "date": "2026-11-04",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-18",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036855.pdf",
+   "match": null
+  },
+  {
+   "who": "Michael A. Rulli (R-OH)",
+   "ticker": "LITE",
+   "type": "S (partial)",
+   "date": "2026-11-04",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-18",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036855.pdf",
+   "match": null
+  },
+  {
+   "who": "Michael A. Rulli (R-OH)",
+   "ticker": "MSFT",
+   "type": "P",
+   "date": "2026-11-04",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-18",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036855.pdf",
+   "match": null
+  },
+  {
+   "who": "Michael A. Rulli (R-OH)",
+   "ticker": "NVDA",
+   "type": "S (partial)",
+   "date": "2026-10-28",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-18",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036855.pdf",
+   "match": null
+  },
+  {
+   "who": "Terri A. Sewell (D-AL)",
+   "ticker": "TPR",
+   "type": "S",
+   "date": "2026-11-05",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-18",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036864.pdf",
+   "match": null
+  },
+  {
+   "who": "Thomas H. Kean, Jr. (R-NJ)",
+   "ticker": "JNJ",
+   "type": "S (partial)",
+   "date": "2026-10-27",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-19",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036844.pdf",
+   "match": null
+  },
+  {
+   "who": "Thomas H. Kean, Jr. (R-NJ)",
+   "ticker": "MSFT",
+   "type": "S (partial)",
+   "date": "2026-10-27",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-19",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036844.pdf",
+   "match": null
+  },
+  {
+   "who": "Thomas H. Kean, Jr. (R-NJ)",
+   "ticker": "SYK",
+   "type": "S (partial)",
+   "date": "2026-10-27",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-19",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036844.pdf",
+   "match": null
+  },
+  {
+   "who": "Thomas H. Kean, Jr. (R-NJ)",
+   "ticker": "WBD",
+   "type": "S",
+   "date": "2026-10-07",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-19",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036844.pdf",
+   "match": null
+  },
+  {
+   "who": "Thomas H. Kean, Jr. (R-NJ)",
+   "ticker": "WBD",
+   "type": "S",
+   "date": "2026-10-07",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-19",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036844.pdf",
+   "match": null
   }
  ],
  "sic": {
@@ -1772,6 +1906,14 @@
   "MBB": [
    null,
    ""
+  ],
+  "COST": [
+   5331,
+   "Retail-Variety Stores"
+  ],
+  "TPR": [
+   3100,
+   "Leather & Leather Products"
   ]
  }
 }
