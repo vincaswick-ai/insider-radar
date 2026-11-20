@@ -43,7 +43,9 @@
   "H20036849",
   "H20036855",
   "H20036864",
-  "H20036844"
+  "H20036844",
+  "S8f97b859-75e2-4739-8392-d375744aea97",
+  "Sf0f7eba0-ca09-4b80-a97b-64b6dafb835e"
  ],
  "trades": [
   {
@@ -1548,6 +1550,16 @@
    "filed": "2026-11-19",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036844.pdf",
    "match": null
+  },
+  {
+   "who": "Ted Cruz (R)",
+   "ticker": "GS",
+   "type": "S (partial)",
+   "date": "2026-11-11",
+   "amount": "$250,001 - $500,000",
+   "filed": "2026-11-20",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/f0f7eba0-ca09-4b80-a97b-64b6dafb835e/",
+   "match": null
   }
  ],
  "sic": {
@@ -1914,6 +1926,10 @@
   "TPR": [
    3100,
    "Leather & Leather Products"
+  ],
+  "GS": [
+   6211,
+   "Security Brokers, Dealers & Flotation Companies"
   ]
  }
 }
