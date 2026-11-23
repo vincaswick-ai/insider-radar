@@ -45,7 +45,9 @@
   "H20036864",
   "H20036844",
   "S8f97b859-75e2-4739-8392-d375744aea97",
-  "Sf0f7eba0-ca09-4b80-a97b-64b6dafb835e"
+  "Sf0f7eba0-ca09-4b80-a97b-64b6dafb835e",
+  "H20036883",
+  "H20036891"
  ],
  "trades": [
   {
@@ -1560,6 +1562,26 @@
    "filed": "2026-11-20",
    "url": "https://efdsearch.senate.gov/search/view/ptr/f0f7eba0-ca09-4b80-a97b-64b6dafb835e/",
    "match": null
+  },
+  {
+   "who": "Jennifer L. McClellan (D-VA)",
+   "ticker": "VZ",
+   "type": "S (partial)",
+   "date": "2026-11-19",
+   "amount": "$50,001 - $100,000",
+   "filed": "2026-11-20",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036883.pdf",
+   "match": null
+  },
+  {
+   "who": "Ed Case (D-HI)",
+   "ticker": "AAPL",
+   "type": "P",
+   "date": "2026-11-16",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-21",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036891.pdf",
+   "match": null
   }
  ],
  "sic": {
@@ -1930,6 +1952,10 @@
   "GS": [
    6211,
    "Security Brokers, Dealers & Flotation Companies"
+  ],
+  "VZ": [
+   4813,
+   "Telephone Communications (No Radiotelephone)"
   ]
  }
 }
