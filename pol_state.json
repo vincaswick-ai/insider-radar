@@ -47,7 +47,8 @@
   "S8f97b859-75e2-4739-8392-d375744aea97",
   "Sf0f7eba0-ca09-4b80-a97b-64b6dafb835e",
   "H20036883",
-  "H20036891"
+  "H20036891",
+  "S9d3510cc-b11b-4777-a8a8-f0a58e886290"
  ],
  "trades": [
   {
@@ -1582,6 +1583,16 @@
    "filed": "2026-11-21",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036891.pdf",
    "match": null
+  },
+  {
+   "who": "Richard Blumenthal (D)",
+   "ticker": "STLN",
+   "type": "S (partial)",
+   "date": "2026-11-04",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-24",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/9d3510cc-b11b-4777-a8a8-f0a58e886290/",
+   "match": null
   }
  ],
  "sic": {
@@ -1956,6 +1967,10 @@
   "VZ": [
    4813,
    "Telephone Communications (No Radiotelephone)"
+  ],
+  "STLN": [
+   8011,
+   "Services-Offices & Clinics of  Doctors of  Medicine"
   ]
  }
 }
