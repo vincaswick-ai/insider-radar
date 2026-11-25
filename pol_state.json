@@ -49,7 +49,8 @@
   "H20036883",
   "H20036891",
   "S9d3510cc-b11b-4777-a8a8-f0a58e886290",
-  "H20035776"
+  "H20035776",
+  "H20036848"
  ],
  "trades": [
   {
@@ -3286,6 +3287,16 @@
    "amount": "$1,001 - $15,000",
    "filed": "2026-11-23",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20035776.pdf",
+   "match": null
+  },
+  {
+   "who": "Daniel Meuser (R-PA)",
+   "ticker": "NVDA",
+   "type": "S (partial)",
+   "date": "2026-10-27",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036848.pdf",
    "match": null
   }
  ],
