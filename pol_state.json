@@ -50,7 +50,10 @@
   "H20036891",
   "S9d3510cc-b11b-4777-a8a8-f0a58e886290",
   "H20035776",
-  "H20036848"
+  "H20036848",
+  "H20036875",
+  "H20036908",
+  "S99dc7269-2f99-4c8b-8d0c-a3a91328af84"
  ],
  "trades": [
   {
@@ -3298,6 +3301,255 @@
    "filed": "2026-11-24",
    "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036848.pdf",
    "match": null
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "ACLLY",
+   "type": "S",
+   "date": "2026-11-10",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036875.pdf",
+   "match": null
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "ASML",
+   "type": "S (partial)",
+   "date": "2026-11-09",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036875.pdf",
+   "match": null
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "CMI",
+   "type": "S (partial)",
+   "date": "2026-11-16",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036875.pdf",
+   "match": null
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "ETN",
+   "type": "S (partial)",
+   "date": "2026-11-10",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036875.pdf",
+   "match": null
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "INTC",
+   "type": "S (partial)",
+   "date": "2026-11-09",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036875.pdf",
+   "match": null
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "PSX",
+   "type": "S (partial)",
+   "date": "2026-11-10",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036875.pdf",
+   "match": null
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "ROK",
+   "type": "S (partial)",
+   "date": "2026-11-17",
+   "amount": "$50,001 - $100,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036875.pdf",
+   "match": null
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "ROK",
+   "type": "S (partial)",
+   "date": "2026-11-17",
+   "amount": "$50,001 - $100,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036875.pdf",
+   "match": null
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "ROK",
+   "type": "S (partial)",
+   "date": "2026-11-16",
+   "amount": "$100,001 - $250,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036875.pdf",
+   "match": null
+  },
+  {
+   "who": "Kevin Hern (R-OK)",
+   "ticker": "STX",
+   "type": "S (partial)",
+   "date": "2026-11-10",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036875.pdf",
+   "match": null
+  },
+  {
+   "who": "Robert F. Onder, Jr. (R-MO)",
+   "ticker": "AMP",
+   "type": "S",
+   "date": "2026-10-29",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036908.pdf",
+   "match": null
+  },
+  {
+   "who": "Robert F. Onder, Jr. (R-MO)",
+   "ticker": "CMCSA",
+   "type": "S",
+   "date": "2026-10-29",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036908.pdf",
+   "match": null
+  },
+  {
+   "who": "Robert F. Onder, Jr. (R-MO)",
+   "ticker": "DUK",
+   "type": "S",
+   "date": "2026-10-29",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036908.pdf",
+   "match": null
+  },
+  {
+   "who": "Robert F. Onder, Jr. (R-MO)",
+   "ticker": "GEHCV",
+   "type": "S",
+   "date": "2026-10-29",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036908.pdf",
+   "match": null
+  },
+  {
+   "who": "Robert F. Onder, Jr. (R-MO)",
+   "ticker": "HPQ",
+   "type": "S",
+   "date": "2026-10-29",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036908.pdf",
+   "match": null
+  },
+  {
+   "who": "Robert F. Onder, Jr. (R-MO)",
+   "ticker": "MDT",
+   "type": "S",
+   "date": "2026-10-29",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036908.pdf",
+   "match": null
+  },
+  {
+   "who": "Robert F. Onder, Jr. (R-MO)",
+   "ticker": "MDLZ",
+   "type": "S",
+   "date": "2026-10-29",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036908.pdf",
+   "match": null
+  },
+  {
+   "who": "Robert F. Onder, Jr. (R-MO)",
+   "ticker": "PEP",
+   "type": "S",
+   "date": "2026-10-29",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036908.pdf",
+   "match": null
+  },
+  {
+   "who": "Robert F. Onder, Jr. (R-MO)",
+   "ticker": "PG",
+   "type": "S",
+   "date": "2026-10-29",
+   "amount": "$15,001 - $50,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036908.pdf",
+   "match": null
+  },
+  {
+   "who": "Robert F. Onder, Jr. (R-MO)",
+   "ticker": "VZ",
+   "type": "S",
+   "date": "2026-10-29",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036908.pdf",
+   "match": null
+  },
+  {
+   "who": "Robert F. Onder, Jr. (R-MO)",
+   "ticker": "DIS",
+   "type": "S",
+   "date": "2026-10-29",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-24",
+   "url": "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/2026/20036908.pdf",
+   "match": null
+  },
+  {
+   "who": "Rand Paul (R)",
+   "ticker": "NVDA",
+   "type": "P",
+   "date": "2026-11-05",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-25",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/99dc7269-2f99-4c8b-8d0c-a3a91328af84/",
+   "match": [
+    "Homeland Security and Governmental Affairs",
+    "defense / tech"
+   ]
+  },
+  {
+   "who": "Rand Paul (R)",
+   "ticker": "NVDA",
+   "type": "P",
+   "date": "2026-11-07",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-25",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/99dc7269-2f99-4c8b-8d0c-a3a91328af84/",
+   "match": [
+    "Homeland Security and Governmental Affairs",
+    "defense / tech"
+   ]
+  },
+  {
+   "who": "Rand Paul (R)",
+   "ticker": "NVDA",
+   "type": "P",
+   "date": "2026-11-09",
+   "amount": "$1,001 - $15,000",
+   "filed": "2026-11-25",
+   "url": "https://efdsearch.senate.gov/search/view/ptr/99dc7269-2f99-4c8b-8d0c-a3a91328af84/",
+   "match": [
+    "Homeland Security and Governmental Affairs",
+    "defense / tech"
+   ]
   }
  ],
  "sic": {
@@ -3980,6 +4232,46 @@
   "QSR": [
    5812,
    "Retail-Eating  Places"
+  ],
+  "ROK": [
+   3829,
+   "Measuring & Controlling Devices, NEC"
+  ],
+  "INTC": [
+   3674,
+   "Semiconductors & Related Devices"
+  ],
+  "PSX": [
+   2911,
+   "Petroleum Refining"
+  ],
+  "STX": [
+   3572,
+   "Computer Storage Devices"
+  ],
+  "CMI": [
+   3510,
+   "Engines & Turbines"
+  ],
+  "ACLLY": [
+   null,
+   ""
+  ],
+  "HPQ": [
+   3570,
+   "Computer & office Equipment"
+  ],
+  "AMP": [
+   6282,
+   "Investment Advice"
+  ],
+  "GEHCV": [
+   null,
+   ""
+  ],
+  "DUK": [
+   4931,
+   "Electric & Other Services Combined"
   ]
  }
 }
