@@ -6003,17 +6003,6 @@
  ],
  "buys": [
   {
-   "ticker": "NYSE:FLG",
-   "company": "FLAGSTAR BANK, NATIONAL ASSOCIATION",
-   "name": "Alan L Frank",
-   "role": "Director",
-   "value": 101400.0,
-   "date": "2026-10-27",
-   "accession": "0001649471-26-000006",
-   "url": "https://www.sec.gov/Archives/edgar/data/910073/000164947126000006/xslF345X06/wk-form4_1793210452.xml",
-   "price": 10.14
-  },
-  {
    "ticker": "HYMC",
    "company": "HYCROFT MINING HOLDING CORP",
    "name": "Blake Rhodes",
@@ -6023,17 +6012,6 @@
    "accession": "0001493152-26-048971",
    "url": "https://www.sec.gov/Archives/edgar/data/1718405/000149315226048971/xslF345X06/ownership.xml",
    "price": 16.6917
-  },
-  {
-   "ticker": "DSM",
-   "company": "BNY MELLON STRATEGIC MUNICIPAL BOND FUND, INC.",
-   "name": "Saba Capital Management L.P.",
-   "role": "10% Owner",
-   "value": 77102.85,
-   "date": "2026-10-27",
-   "accession": "0001510281-26-000388",
-   "url": "https://www.sec.gov/Archives/edgar/data/855887/000151028126000388/xslF345X06/primary_doc.xml",
-   "price": 5.63
   },
   {
    "ticker": "TTMI",
@@ -6056,28 +6034,6 @@
    "accession": "0001193125-26-436562",
    "url": "https://www.sec.gov/Archives/edgar/data/1116942/000119312526436562/xslF345X06/ownership.xml",
    "price": 88.07
-  },
-  {
-   "ticker": "API",
-   "company": "Agora, Inc.",
-   "name": "Bin Zhao",
-   "role": "CEO, Director",
-   "value": 56080.66,
-   "date": "2026-10-27",
-   "accession": "0001193125-26-437062",
-   "url": "https://www.sec.gov/Archives/edgar/data/1802883/000119312526437062/xslF345X06/ownership.xml",
-   "price": 4.4689
-  },
-  {
-   "ticker": "NBIS",
-   "company": "Nebius Group N.V.",
-   "name": "Arne Grimme",
-   "role": "Director",
-   "value": 57739.52,
-   "date": "2026-10-27",
-   "accession": "0001513845-26-000143",
-   "url": "https://www.sec.gov/Archives/edgar/data/1513845/000151384526000143/xslF345X06/form4.xml",
-   "price": 163.568
   },
   {
    "ticker": "BBT",
@@ -6113,17 +6069,6 @@
    "price": 148.37
   },
   {
-   "ticker": "BMN",
-   "company": "BlackRock 2037 Municipal Target Term Trust",
-   "name": "Bank Of America Corp /De/",
-   "role": "10% Owner",
-   "value": 70548.6,
-   "date": "2026-10-27",
-   "accession": "0000070858-26-000543",
-   "url": "https://www.sec.gov/Archives/edgar/data/70858/000007085826000543/xslF345X06/primary_doc.xml",
-   "price": 22.98
-  },
-  {
    "ticker": "XYL",
    "company": "Xylem Inc.",
    "name": "D Christian Koch",
@@ -6133,28 +6078,6 @@
    "accession": "0001524472-26-000150",
    "url": "https://www.sec.gov/Archives/edgar/data/1190801/000152447226000150/xslF345X06/form4.xml",
    "price": 89.6
-  },
-  {
-   "ticker": "HBAN",
-   "company": "HUNTINGTON BANCSHARES INC /MD/",
-   "name": "Gary Torgow",
-   "role": "Director",
-   "value": 199834.5,
-   "date": "2026-10-27",
-   "accession": "0001225208-26-008552",
-   "url": "https://www.sec.gov/Archives/edgar/data/49196/000122520826008552/xslF345X06/doc4.xml",
-   "price": 15.735
-  },
-  {
-   "ticker": "SAMG",
-   "company": "Silvercrest Asset Management Group Inc.",
-   "name": "Equinox Partners Investment Management Llc",
-   "role": "10% Owner",
-   "value": 348694.45,
-   "date": "2026-10-27",
-   "accession": "0001013594-26-001116",
-   "url": "https://www.sec.gov/Archives/edgar/data/933897/000101359426001116/xslF345X06/form4.xml",
-   "price": 10.4406
   },
   {
    "ticker": "PNFP",
@@ -6177,17 +6100,6 @@
    "accession": "0001733614-26-000005",
    "url": "https://www.sec.gov/Archives/edgar/data/706698/000173361426000005/xslF345X06/primary_doc.xml",
    "price": 66.75
-  },
-  {
-   "ticker": "CRBG",
-   "company": "Corebridge Financial, Inc.",
-   "name": "Nippon Life Insurance Co",
-   "role": "10% Owner",
-   "value": 6259185.87,
-   "date": "2026-10-27",
-   "accession": "0001193125-26-437931",
-   "url": "https://www.sec.gov/Archives/edgar/data/905591/000119312526437931/xslF345X06/ownership.xml",
-   "price": 35.1385
   },
   {
    "ticker": "SCQCU",
@@ -6221,17 +6133,6 @@
    "accession": "0001510281-26-000391",
    "url": "https://www.sec.gov/Archives/edgar/data/859796/000151028126000391/xslF345X06/primary_doc.xml",
    "price": 11.38
-  },
-  {
-   "ticker": "LRN",
-   "company": "Stride, Inc.",
-   "name": "Dylan G. Haggart",
-   "role": "Director",
-   "value": 62187.84,
-   "date": "2026-10-27",
-   "accession": "0001213900-26-113987",
-   "url": "https://www.sec.gov/Archives/edgar/data/1157408/000121390026113987/xslF345X06/ownership.xml",
-   "price": 78.52
   },
   {
    "ticker": "MED",
